@@ -1,20 +1,25 @@
 import { marked } from 'marked';
 
-import { keystaticReader } from '$lib/keystatic-reader.server';
+/**
+ * Keystatic reads `src/content` via `fs` at runtime. Vercel packages serverless functions
+ * with `@vercel/nft`, which only ships files reachable from static imports — so dynamic
+ * `readFile` paths are omitted. `import.meta.glob` with `?raw` bundles these files into
+ * the SSR graph so they appear in production. Keep editing the same paths in Keystatic.
+ */
+const rawMdxFiles = import.meta.glob<string>('../content/**/*.mdx', {
+	eager: true,
+	query: '?raw',
+	import: 'default'
+});
 
-async function markdownFromHeroField(text: unknown): Promise<string | null> {
-	if (text == null) return null;
-	if (typeof text === 'function') {
-		const raw = await text();
-		return typeof raw === 'string' ? raw : null;
-	}
-	if (typeof text === 'string') return text;
-	return null;
+function getHeroMarkdown(): string {
+	const key = Object.keys(rawMdxFiles).find((k) => k.includes('singletons/hero-text.mdx'));
+	const raw = key ? rawMdxFiles[key] : undefined;
+	return typeof raw === 'string' ? raw : '';
 }
 
 export async function load() {
-	const heroTextEntry = await keystaticReader.singletons.heroText.read();
-	const markdown = (await markdownFromHeroField(heroTextEntry?.text))?.trim() ?? '';
+	const markdown = getHeroMarkdown().trim();
 
 	if (!markdown) {
 		return { heroTextHtml: null as string | null };
