@@ -55,4 +55,14 @@
 	.display {
 		@apply font-display text-2xl font-medium leading-tight;
 	}
+
+	/* {@html} from marked: preflight `strong { font-weight: bolder }` is often too close to
+	   an already-medium/heavy parent, so emphasis looks missing in dev. Pin weights. */
+	.display[data-hero-rich-text] strong {
+		font-weight: 800;
+	}
+
+	.display[data-hero-rich-text] em {
+		font-style: italic;
+	}
 }
