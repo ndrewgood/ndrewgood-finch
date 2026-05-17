@@ -7,6 +7,14 @@ Concise notes from project theming decisions. Use this when implementing UI, wri
 - **Page / HTML background:** Tailwind **`stone-100`** (`bg-stone-100` on `html`).
 - **Body copy feel:** **`antialiased`** on `html` (current setup).
 
+## Colors
+
+| Token | Hex | Notes |
+|-------|-----|--------|
+| `stone-150` | `#eeedec` | Project extension between `stone-100` and `stone-200` (`--color-stone-150` in `@theme`) |
+
+Use like any Tailwind color: `bg-stone-150`, `text-stone-150`, `border-stone-150`, etc.
+
 ## Typography
 
 ### Fonts

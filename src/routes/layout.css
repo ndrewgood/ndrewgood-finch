@@ -27,6 +27,8 @@
 	--font-sans:
 		'Nunito Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji';
 	--font-display: 'Nunito', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji';
+
+	--color-stone-150: #EFEFEE;
 }
 
 @layer base {
@@ -34,35 +36,83 @@
 		@apply bg-stone-100 font-sans antialiased;
 	}
 
-	h1,
-	h2,
-	h3,
-	h4,
+	::selection {
+		@apply bg-stone-200;
+	  }
+
+	h1 {
+		@apply font-display text-3xl font-bold text-stone-900;
+	}
+
+	h2 {
+		@apply font-display text-2xl font-bold text-stone-900;
+	}
+
+	h3 {
+		@apply font-display text-xl font-bold text-stone-900;
+	}
+
+	h4 {
+		@apply font-display text-lg font-bold text-stone-900;
+	}
+
 	h5,
 	h6 {
 		@apply font-display;
+	}
+
+	p {
+		@apply text-base font-medium text-stone-500;
+	}
+
+	a {
+		@apply text-base text-stone-500 underline underline-offset-3 decoration-1 hover:text-sky-500 active:text-sky-600;
 	}
 
 	button,
 	input[type='button'],
 	input[type='submit'],
 	input[type='reset'] {
-		@apply font-display;
+		@apply font-display select-none;
 	}
 }
 
 @layer components {
+	/* Display text */
 	.display {
-		@apply font-display text-2xl font-medium leading-tight;
+		@apply font-display text-2xl font-medium leading-tight text-stone-500;
 	}
 
-	/* {@html} from marked: preflight `strong { font-weight: bolder }` is often too close to
-	   an already-medium/heavy parent, so emphasis looks missing in dev. Pin weights. */
 	.display[data-hero-rich-text] strong {
-		font-weight: 800;
+		@apply text-stone-900 font-bold;
+	}
+
+	/* Marked HTML inside hero: inherit .display typography instead of global h/p/a base styles */
+	.display[data-hero-rich-text] :is(h1, h2, h3, h4, h5, h6, p, li, blockquote) {
+		margin: 0;
+		font: inherit;
+		color: inherit;
+		line-height: inherit;
+		letter-spacing: inherit;
+	}
+
+	.display[data-hero-rich-text] a {
+		font: inherit;
+		line-height: inherit;
+		text-decoration: none;
+	}
+
+	.display[data-hero-rich-text] a:hover,
+	.display[data-hero-rich-text] a:active {
+		color: inherit;
 	}
 
 	.display[data-hero-rich-text] em {
 		font-style: italic;
+	}
+
+	/* Horizontal line */
+	.h-line {
+		@apply m-auto h-0.5 rounded-full bg-stone-300;
 	}
 }
