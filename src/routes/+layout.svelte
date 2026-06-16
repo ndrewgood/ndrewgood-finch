@@ -1,11 +1,17 @@
 <script lang="ts">
 	import './layout.css';
 	import favicon from '$lib/assets/favicon.svg';
-	import GlobalNav from '$lib/components/GlobalNav.svelte';
+	import GlobalNav from '$lib/components/GlobalNav';
+	import { browser, dev } from '$app/environment';
+	import { Agentation } from 'sv-agentation';
 	
-	let { children } = $props();
+	let { data, children } = $props();
 </script>
 
 <svelte:head><link rel="icon" href={favicon} /></svelte:head>
-<GlobalNav />
+{#if browser && dev}
+	<Agentation />
+{/if}
+<GlobalNav experience={data.experience} pastSites={data.pastSites} />
+
 {@render children()}

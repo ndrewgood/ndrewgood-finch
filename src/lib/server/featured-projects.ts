@@ -1,0 +1,1 @@
+export { getFeaturedProjects } from './projects';

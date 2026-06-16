@@ -1,0 +1,31 @@
+entries:
+  - label: Google (FTE)
+    company: Google
+    icon: /content/singletons/experience/icons/entries/0/icon.svg
+    startMonthYear: July 2022
+    endMonthYear: Now
+    title: Interaction Designer
+  - label: Google (Intern)
+    company: Google
+    icon: /content/singletons/experience/icons/entries/1/icon.svg
+    startMonthYear: June 2021
+    endMonthYear: Sept 2021
+    title: UX Design Intern
+  - label: HP
+    company: HP
+    icon: /content/singletons/experience/icons/entries/2/icon.svg
+    startMonthYear: Sept 2020
+    endMonthYear: Nov 2020
+    title: UX Designer (Contract)
+  - label: Bobblehaus
+    company: Bobblehaus
+    icon: /content/singletons/experience/icons/entries/3/icon.svg
+    startMonthYear: Mar 2020
+    endMonthYear: July 2020
+    title: Design Intern
+  - label: SCAD
+    company: SCAD
+    icon: /content/singletons/experience/icons/entries/4/icon.svg
+    startMonthYear: Aug 2018
+    endMonthYear: June 2022
+    title: BFA in UX Design

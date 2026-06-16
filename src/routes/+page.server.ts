@@ -1,5 +1,7 @@
 import { marked } from 'marked';
 
+import { getAllProjects, getFeaturedProjects } from '$lib/server/projects';
+
 /**
  * Keystatic reads `src/content` via `fs` at runtime. Vercel packages serverless functions
  * with `@vercel/nft`, which only ships files reachable from static imports — so dynamic
@@ -12,21 +14,32 @@ const rawMdxFiles = import.meta.glob<string>('../content/**/*.mdx', {
 	import: 'default'
 });
 
+/** Keystatic MDX singletons prepend JSON frontmatter (e.g. `---\n{}\n---`). */
+function stripFrontmatter(raw: string): string {
+	if (!raw.startsWith('---')) return raw;
+	const end = raw.indexOf('\n---', 3);
+	if (end === -1) return raw;
+	return raw.slice(end + 4).trimStart();
+}
+
 function getHeroMarkdown(): string {
 	const key = Object.keys(rawMdxFiles).find((k) => k.includes('singletons/hero-text.mdx'));
 	const raw = key ? rawMdxFiles[key] : undefined;
-	return typeof raw === 'string' ? raw : '';
+	return typeof raw === 'string' ? stripFrontmatter(raw) : '';
 }
 
 export async function load() {
 	const markdown = getHeroMarkdown().trim();
 
+	const featuredProjects = getFeaturedProjects();
+	const allProjects = getAllProjects();
+
 	if (!markdown) {
-		return { heroTextHtml: null as string | null };
+		return { heroTextHtml: null as string | null, featuredProjects, allProjects };
 	}
 
 	const parsed = marked.parse(markdown, { async: false });
 	const heroTextHtml = typeof parsed === 'string' ? parsed : await parsed;
 
-	return { heroTextHtml };
+	return { heroTextHtml, featuredProjects, allProjects };
 }

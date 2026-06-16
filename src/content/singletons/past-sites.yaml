@@ -1,0 +1,19 @@
+sites:
+  - dateRange: 2022 - 2025
+    description: Post-grad archive site
+    link: https://2022.ndrewgood.com/
+  - dateRange: 2020 - 2021
+    description: Junior year portfolio
+    link: https://2021.ndrewgood.com/
+  - dateRange: 2019 - 2020
+    description: Sophmore year portfolio
+    link: https://2020.ndrewgood.com/
+  - dateRange: 2018 - 2019
+    description: Freshman year portfolio
+    link: https://2019.ndrewgood.com/
+  - dateRange: 2017 - 2018
+    description: First Jamstack site
+    link: https://2018.ndrewgood.com/
+  - dateRange: 2016 - 2017
+    description: My first personal website
+    link: https://ndrewgood.github.io/pwb2/
