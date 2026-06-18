@@ -1,3 +1,5 @@
+export type ProjectListTag = 'New' | 'Coming Soon';
+
 export type ProjectTag = 'Design' | 'Development' | 'Physical Computing';
 
 export type FeaturedProjectData = {
@@ -19,6 +21,8 @@ export type AllProjectListItem = {
 	description: string;
 	iconSvg: string;
 	endDateLabel: string;
+	tags: ProjectListTag[];
+	videoId?: string;
 	cta: string;
 	ctaText: string;
 };

@@ -107,6 +107,10 @@ export default config({
 				description: fields.text({
 					label: 'Description'
 				}),
+				hide: fields.checkbox({
+					label: 'Hide',
+					description: 'When enabled, this project is hidden from the all projects list.'
+				}),
 				icon: fields.file({
 					label: 'Icon',
 					description: 'SVG icon for this project.',
@@ -115,6 +119,13 @@ export default config({
 				}),
 				tags: fields.multiselect({
 					label: 'Tags',
+					options: [
+						{ label: 'New', value: 'New' },
+						{ label: 'Coming Soon', value: 'Coming Soon' }
+					]
+				}),
+				featuredTags: fields.multiselect({
+					label: 'Featured tags',
 					options: [
 						{ label: 'Design', value: 'Design' },
 						{ label: 'Development', value: 'Development' },

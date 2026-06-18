@@ -1,8 +1,10 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
 	import type { HTMLButtonAttributes } from 'svelte/elements';
+	import { tick } from 'svelte';
 
 	import type { IconName } from '$lib/assets/icons';
+	import { createCopySwap } from '$lib/copy-swap.svelte';
 
 	import Icon from './Icon.svelte';
 
@@ -27,6 +29,12 @@
 		iconSize?: string;
 		/** Tailwind background utility, e.g. `bg-stone-100`, `bg-white`. */
 		background?: string;
+		/** Tailwind shadow utility, e.g. `shadow-[0_3px_0_0_theme(colors.blue.800)]`. Defaults to stone.300. */
+		shadow?: string;
+		/** When set, clicking copies this string and swaps label/icon to a success state. */
+		copyText?: string;
+		/** Success label after copy. Defaults to "Email copied!". */
+		copySuccessLabel?: string;
 		children?: Snippet;
 	};
 
@@ -42,12 +50,24 @@
 		rounded = 'rounded-full',
 		iconSize,
 		background,
+		shadow,
+		copyText,
+		copySuccessLabel = 'Email copied!',
 		class: className = '',
 		children,
+		onclick,
 		...rest
 	}: Props = $props();
 
-	const iconRevealOnHover = $derived(iconHover && !!icon);
+	const filledShadow = $derived(
+		shadow ?? 'shadow-[0_3px_0_0_theme(colors.stone.300)]'
+	);
+
+	const isCopyButton = $derived(!!copyText);
+	const copySwap = createCopySwap(() => copyText ?? '');
+	const copyIcon = $derived(icon ?? 'content_copy_outline');
+
+	const iconRevealOnHover = $derived(iconHover && !!icon && !isCopyButton);
 	const isTextLike = $derived(variant === 'text');
 
 	const sizingClasses = $derived(
@@ -66,7 +86,7 @@
 			widthClasses,
 			height,
 			rounded,
-			iconRevealOnHover ? 'group gap-0' : 'gap-2',
+			isCopyButton || iconRevealOnHover ? 'group gap-0' : 'gap-2',
 			sizingClasses
 		]
 			.filter(Boolean)
@@ -78,10 +98,10 @@
 		background
 			? isTextLike
 				? `${background} shadow-none`
-				: `${background} shadow-[0_3px_0_0_theme(colors.stone.300)]`
+				: `${background} ${filledShadow}`
 			: isTextLike
 				? 'bg-transparent shadow-none'
-				: 'bg-white shadow-[0_3px_0_0_theme(colors.stone.300)]'
+				: `bg-white ${filledShadow}`
 	);
 
 	const interactionClasses = $derived(
@@ -93,7 +113,7 @@
 				? 'group cursor-pointer transition-all duration-[120ms] ease-out-cubic hover:bg-stone-150 active:bg-stone-200 active:scale-[0.97]'
 				: 'group cursor-pointer transition-all duration-[120ms] ease-out-cubic hover:bg-stone-50 active:translate-y-[3px] active:bg-stone-200 active:shadow-none'
 	);
-	
+
 	const accessibilityClasses =
 		'select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stone-500 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50';
 
@@ -108,28 +128,139 @@
 	);
 
 	const hasLabel = $derived(!!children);
+
+	async function handleCopyClick(
+		event: MouseEvent & { currentTarget: EventTarget & HTMLButtonElement }
+	) {
+		await copySwap.copy();
+		onclick?.(event);
+	}
+
+	const copyIconRevealClasses = $derived(
+		copySwap.defaultLayer === 'shown' && !copySwap.copied
+			? 'blur-xs opacity-0 scale-50 transition-all duration-[160ms] ease-out-cubic group-hover:blur-none group-hover:scale-100 group-hover:opacity-100'
+			: ''
+	);
+
+	const successTextInFlow = $derived(copySwap.successLayer === 'shown');
+	let swapTextEl = $state<HTMLDivElement | undefined>();
+	let swapTextWidth = $state<number | undefined>();
+
+	$effect(() => {
+		copySwap.defaultLayer;
+		copySwap.successLayer;
+
+		tick().then(() => {
+			if (swapTextEl) {
+				swapTextWidth = swapTextEl.scrollWidth;
+			}
+		});
+	});
 </script>
 
 {#snippet iconNode()}
 	{#if icon}
 		{#if iconRevealOnHover}
-				<span class={`flex items-center w-0 h-2.5 group-hover:w-6 transition-all duration-[200ms] ease-out-cubic ${iconPosition === 'leading' ? 'justify-start' : 'justify-end'}`}>
-					<Icon name={icon} class={`${iconSizeClasses} blur-xs opacity-0 scale-50 transition-all duration-[160ms] ease-out-cubic group-hover:blur-none group-hover:scale-100 group-hover:opacity-100`} />
-				</span>
+			<span
+				class={`flex items-center w-0 h-2.5 group-hover:w-6 transition-all duration-[200ms] ease-out-cubic ${iconPosition === 'leading' ? 'justify-start' : 'justify-end'}`}
+			>
+				<Icon
+					name={icon}
+					class={`${iconSizeClasses} blur-xs opacity-0 scale-50 transition-all duration-[160ms] ease-out-cubic group-hover:blur-none group-hover:scale-100 group-hover:opacity-100`}
+				/>
+			</span>
 		{:else}
 			<Icon name={icon} class={iconSizeClasses} />
 		{/if}
 	{/if}
 {/snippet}
 
-<button {...rest} class={`${buttonClasses} ${className}`.trim()}>
-	{#if icon && iconPosition === 'leading'}
-		{@render iconNode()}
-	{/if}
-	{#if hasLabel}
-		{@render children?.()}
-	{/if}
-	{#if icon && iconPosition === 'trailing'}
-		{@render iconNode()}
-	{/if}
-</button>
+{#snippet copyIconNode()}
+	<span
+		class={[
+			'flex items-center h-2.5 transition-all duration-[200ms] ease-out-cubic',
+			iconPosition === 'leading' ? 'justify-start' : 'justify-end',
+			copySwap.copied ? 'w-6' : 'w-0 group-hover:w-6'
+		]}
+	>
+		<span class={`relative shrink-0 ${iconSizeClasses}`}>
+			<span
+				class={[
+					'absolute inset-0 flex items-center justify-center swap-layer',
+					copySwap.layerClass(copySwap.defaultLayer),
+					copySwap.suppressSwapTransition && 'swap-layer--no-transition'
+				]}
+				aria-hidden="true"
+			>
+				<Icon name={copyIcon} class={`${iconSizeClasses} ${copyIconRevealClasses}`.trim()} />
+			</span>
+			<span
+				class={[
+					'absolute inset-0 flex items-center justify-center swap-layer',
+					copySwap.layerClass(copySwap.successLayer),
+					copySwap.suppressSwapTransition && 'swap-layer--no-transition'
+				]}
+				aria-hidden="true"
+			>
+				<Icon name="check" class={iconSizeClasses} />
+			</span>
+		</span>
+	</span>
+{/snippet}
+
+{#if isCopyButton}
+	<button
+		{...rest}
+		type="button"
+		class={`${buttonClasses} ${className}`.trim()}
+		aria-live="polite"
+		onclick={handleCopyClick}
+	>
+		{#if iconPosition === 'leading'}
+			{@render copyIconNode()}
+		{/if}
+		<div
+			bind:this={swapTextEl}
+			class="swap-text relative inline-block"
+			style:width={swapTextWidth === undefined ? undefined : `${swapTextWidth}px`}
+		>
+			<div
+				class={[
+					'swap-layer whitespace-nowrap',
+					copySwap.layerClass(copySwap.defaultLayer),
+					copySwap.suppressSwapTransition && 'swap-layer--no-transition',
+					successTextInFlow && 'pointer-events-none absolute inset-y-0 left-0'
+				]}
+			>
+				{#if hasLabel}
+					{@render children?.()}
+				{/if}
+			</div>
+			<div
+				class={[
+					'swap-layer whitespace-nowrap',
+					copySwap.layerClass(copySwap.successLayer),
+					copySwap.suppressSwapTransition && 'swap-layer--no-transition',
+					!successTextInFlow && 'pointer-events-none absolute inset-y-0 left-0'
+				]}
+			>
+				{copySuccessLabel}
+			</div>
+		</div>
+		{#if iconPosition === 'trailing'}
+			{@render copyIconNode()}
+		{/if}
+	</button>
+{:else}
+	<button {...rest} class={`${buttonClasses} ${className}`.trim()} {onclick}>
+		{#if icon && iconPosition === 'leading'}
+			{@render iconNode()}
+		{/if}
+		{#if hasLabel}
+			{@render children?.()}
+		{/if}
+		{#if icon && iconPosition === 'trailing'}
+			{@render iconNode()}
+		{/if}
+	</button>
+{/if}

@@ -11,7 +11,7 @@
 	let isPaused = $state(true);
 </script>
 
-<div class="group/featured relative w-3xl">
+<div class="group/featured relative">
 	{#if videoId && highlightColor}
 		<div
 			class={[
@@ -36,10 +36,10 @@
 				</div>
 				<div class="flex flex-col gap-0">
 					<h3 class="leading-5">{title}</h3>
-					<p>{description}</p>
+					<p class="min-[600px]:text-base text-sm">{description}</p>
 				</div>
 			</div>
-			<div class="flex flex-row gap-3">
+			<div class="min-[750px]:flex hidden flex-row gap-3">
 				{#each tags as tag (tag)}
 					<ProjectTag label={tag} />
 				{/each}

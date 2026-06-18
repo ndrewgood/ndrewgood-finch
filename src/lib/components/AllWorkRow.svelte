@@ -9,6 +9,7 @@
 		description,
 		iconSvg,
 		endDateLabel,
+		tags,
 		cta,
 		ctaText
 	}: AllProjectListItem = $props();
@@ -22,6 +23,8 @@
 	});
 
 	const hoverLabel = $derived(cta ? ctaText : 'Coming soon...');
+	const isNew = $derived(tags.includes('New'));
+	const isComingSoon = $derived(tags.includes('Coming Soon'));
 </script>
 
 <svelte:element
@@ -32,7 +35,10 @@
 	aria-label={cta ? `${title}. ${description}` : undefined}
 	aria-disabled={cta ? undefined : true}
 	class={[
-		'group flex w-full scale-[98%] flex-row items-center justify-between rounded-lg px-4 py-3 no-underline transition-all duration-[300ms] ease-out-cubic hover:scale-100 hover:bg-stone-150 active:scale-100 active:bg-stone-200 hover:text-inherit active:text-inherit',
+		'group flex w-full select-none flex-row items-center justify-between rounded-lg px-4 py-3 no-underline transition-all duration-[300ms] ease-out-cubic',
+		isComingSoon
+			? 'scale-[98%] opacity-50'
+			: 'scale-[98%] hover:scale-100 hover:bg-stone-150 active:scale-100 active:bg-stone-200 hover:text-inherit active:text-inherit',
 		cta ? 'cursor-pointer' : 'cursor-not-allowed'
 	]}
 >
@@ -57,7 +63,12 @@
 			</p>
 		</div>
 	</div>
-	<div class="flex shrink-0 items-center justify-end pl-4 text-right font-display font-bold text-stone-500">
+	<div class="flex shrink-0 items-center justify-end gap-0 pl-4 text-right font-display font-bold text-stone-500">
+		{#if isNew}
+			<span class="new-chip hidden min-[550px]:flex h-fit flex-row items-center rounded-lg bg-[#E2FCFF] px-3 py-1 font-display font-bold text-[#04434B]">
+				New!
+			</span>
+		{/if}
 		<div class="cta-swap grid justify-items-end">
 			<span class="swap-layer swap-layer--date col-start-1 row-start-1">{endDateLabel}</span>
 			<span class="swap-layer swap-layer--cta col-start-1 row-start-1 inline-flex items-center gap-1">
@@ -72,7 +83,7 @@
 
 <style>
 	.suffix-tail {
-		display: inline-flex;
+		display: none;
 		max-width: 0;
 		gap: 0.25em;
 		margin-left: 0.25em;
@@ -80,6 +91,12 @@
 		vertical-align: bottom;
 		white-space: nowrap;
 		transition: max-width 200ms var(--ease-out-cubic);
+	}
+
+	@media (min-width: 800px) {
+		.suffix-tail {
+			display: inline-flex;
+		}
 	}
 
 	.group:hover .suffix-tail {
@@ -129,5 +146,19 @@
 		transform: translateY(0);
 		filter: blur(0);
 		pointer-events: auto;
+	}
+
+	.new-chip {
+		transition:
+			opacity 200ms var(--ease-out-cubic),
+			transform 200ms var(--ease-out-cubic),
+			filter 200ms var(--ease-out-cubic);
+	}
+
+	.group:hover .new-chip {
+		opacity: 0;
+		transform: translateY(-0.75rem);
+		filter: blur(2px);
+		pointer-events: none;
 	}
 </style>

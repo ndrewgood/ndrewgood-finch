@@ -32,7 +32,7 @@
 >
 	<button
 		type="button"
-		class="group flex w-full cursor-pointer flex-row items-center gap-4 px-6 py-5 text-left"
+		class="group flex w-full cursor-pointer flex-row items-center gap-4 px-5 py-5 text-left min-[700px]:px-6"
 		aria-expanded={expanded}
 		aria-label={expanded ? `Collapse ${entry.company}` : `Expand ${entry.company}`}
 		onclick={onToggle}
@@ -52,7 +52,7 @@
 				{/if}
 			</div>
 		</div>
-		<p class="w-full text-base leading-4">{entry.title}</p>
+		<p class="hidden w-full text-base leading-4 min-[700px]:block">{entry.title}</p>
 		<span
 			class="flex shrink-0 items-center justify-center rounded-full p-2 opacity-30 transition-all duration-[120ms] ease-out-cubic group-hover:opacity-80"
 			aria-hidden="true"
@@ -64,7 +64,7 @@
 	{#if expanded && hasDescription}
 		<div
 			transition:slide={slideTransition}
-			class="experience-description px-6 pb-5 text-base leading-relaxed text-stone-400"
+			class="experience-description px-5 pb-5 text-base leading-relaxed text-stone-400 min-[700px]:px-6"
 		>
 			{@html entry.descriptionHtml}
 		</div>

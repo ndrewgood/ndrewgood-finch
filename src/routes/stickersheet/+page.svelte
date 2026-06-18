@@ -6,7 +6,7 @@
 	<title>Stickersheet | Finch</title>
 </svelte:head>
 
-<main class="mx-auto max-w-5xl space-y-10 px-6 py-10">
+<main class="mx-auto min-h-screen max-w-5xl space-y-10 bg-stone-100 px-6 py-10">
 	<header class="space-y-2">
 		<h1 class="text-center">Stickersheet</h1>
 	</header>

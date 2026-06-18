@@ -6,18 +6,30 @@
 		playbackId: string;
 		title?: string;
 		isPaused?: boolean;
+		/** When set, overrides the intersection observer for play/pause. */
+		inView?: boolean;
+		/** When false, hides playback controls so the parent can handle clicks. */
+		interactive?: boolean;
 	};
 
-	let { playbackId, title = '', isPaused = $bindable(true) }: Props = $props();
+	let {
+		playbackId,
+		title = '',
+		isPaused = $bindable(true),
+		inView,
+		interactive = true
+	}: Props = $props();
 
 	let ready = $state(false);
 	let container = $state<HTMLDivElement | undefined>();
 	let player = $state<MuxPlayerElement | undefined>();
-	let isInView = $state(false);
+	let observerInView = $state(false);
 	let userPaused = $state(false);
 	let currentTime = $state(0);
 	let duration = $state(0);
 	let isScrubbing = $state(false);
+
+	const effectiveInView = $derived(inView ?? observerInView);
 
 	let progress = $derived(duration > 0 ? (currentTime / duration) * 100 : 0);
 
@@ -31,7 +43,7 @@
 	$effect(() => {
 		if (!player || !ready) return;
 
-		const shouldPlay = isInView && !userPaused;
+		const shouldPlay = effectiveInView && !userPaused;
 		if (shouldPlay && player.paused) {
 			void player.play();
 		} else if (!shouldPlay && !player.paused) {
@@ -40,11 +52,11 @@
 	});
 
 	$effect(() => {
-		if (!ready || !container || !player) return;
+		if (!ready || !container || !player || inView !== undefined) return;
 
 		const observer = new IntersectionObserver(
 			([entry]) => {
-				isInView = entry.isIntersecting;
+				observerInView = entry.isIntersecting;
 			},
 			{ threshold: 0.15 }
 		);
@@ -94,7 +106,7 @@
 
 		if (player.paused) {
 			userPaused = false;
-			if (isInView) void player.play();
+			if (effectiveInView) void player.play();
 		} else {
 			userPaused = true;
 			player.pause();
@@ -131,7 +143,7 @@
 		if (!isScrubbing) return;
 
 		isScrubbing = false;
-		if (wasPlayingBeforeScrub && player && isInView && !userPaused) {
+		if (wasPlayingBeforeScrub && player && effectiveInView && !userPaused) {
 			void player.play();
 		}
 	}
@@ -141,7 +153,8 @@
 	<div
 		class={[
 			'video-shell group relative aspect-[4/3] w-full origin-center overflow-hidden rounded-2xl bg-stone-150 transition-transform duration-300 ease-out-cubic',
-			isPaused && 'scale-[0.98]'
+			isPaused && 'scale-[0.98]',
+			!interactive && 'pointer-events-none'
 		]}
 	>
 		{#if ready}
@@ -157,56 +170,58 @@
 			></mux-player>
 		{/if}
 
-		<button
-			type="button"
-			class="absolute inset-0 z-[1] cursor-pointer border-0 bg-transparent p-0"
-			aria-label={title ? `Play or pause ${title} video` : 'Play or pause video'}
-			onclick={togglePlayback}
-		></button>
+		{#if interactive}
+			<button
+				type="button"
+				class="absolute inset-0 z-[1] cursor-pointer border-0 bg-transparent p-0"
+				aria-label={title ? `Play or pause ${title} video` : 'Play or pause video'}
+				onclick={togglePlayback}
+			></button>
 
-		<div
-			data-progress
-			class={[
-				'pointer-events-none absolute inset-x-0 bottom-0 z-[2] px-5 pb-3 pt-10 opacity-0 transition-opacity duration-200 ease-out group-hover:opacity-100',
-				isScrubbing && 'opacity-100'
-			]}
-		>
 			<div
-				role="slider"
-				tabindex="0"
-				aria-label="Video progress"
-				aria-valuemin={0}
-				aria-valuemax={duration}
-				aria-valuenow={currentTime}
+				data-progress
 				class={[
-					'group/progress pointer-events-auto flex cursor-grab touch-none items-center py-3',
-					isScrubbing && 'cursor-grabbing'
+					'pointer-events-none absolute inset-x-0 bottom-0 z-[2] px-5 pb-3 pt-10 opacity-0 transition-opacity duration-200 ease-out group-hover:opacity-100',
+					isScrubbing && 'opacity-100'
 				]}
-				onpointerdown={handleScrubStart}
-				onpointermove={handleScrubMove}
-				onpointerup={handleScrubEnd}
-				onpointercancel={handleScrubEnd}
-				onpointerleave={handleScrubEnd}
 			>
-				<div class="relative h-1 w-full rounded-full bg-white/25" data-progress-track>
-					<div
-						class="pointer-events-none absolute inset-y-0 left-0 rounded-full bg-white"
-						style:width={`${progress}%`}
-					></div>
-					<div
-						class="pointer-events-none absolute top-1/2 -translate-x-1/2 -translate-y-1/2"
-						style:left={`${progress}%`}
-					>
+				<div
+					role="slider"
+					tabindex="0"
+					aria-label="Video progress"
+					aria-valuemin={0}
+					aria-valuemax={duration}
+					aria-valuenow={currentTime}
+					class={[
+						'group/progress pointer-events-auto flex cursor-grab touch-none items-center py-3',
+						isScrubbing && 'cursor-grabbing'
+					]}
+					onpointerdown={handleScrubStart}
+					onpointermove={handleScrubMove}
+					onpointerup={handleScrubEnd}
+					onpointercancel={handleScrubEnd}
+					onpointerleave={handleScrubEnd}
+				>
+					<div class="relative h-1 w-full rounded-full bg-white/25" data-progress-track>
 						<div
-							class={[
-								'size-1 rounded-full bg-white transition-[width,height] duration-200 ease-out group-hover/progress:size-2.5',
-								isScrubbing && 'size-2.5 opacity-100 transition-none'
-							]}
+							class="pointer-events-none absolute inset-y-0 left-0 rounded-full bg-white"
+							style:width={`${progress}%`}
 						></div>
+						<div
+							class="pointer-events-none absolute top-1/2 -translate-x-1/2 -translate-y-1/2"
+							style:left={`${progress}%`}
+						>
+							<div
+								class={[
+									'size-1 rounded-full bg-white transition-[width,height] duration-200 ease-out group-hover/progress:size-2.5',
+									isScrubbing && 'size-2.5 opacity-100 transition-none'
+								]}
+							></div>
+						</div>
 					</div>
 				</div>
 			</div>
-		</div>
+		{/if}
 	</div>
 </div>
 

@@ -2,7 +2,7 @@ title: Sketch Mixer
 shortDescription: Web demo
 description: Web demo which explores human/GenAI collaboration via sketching
 icon: /content/all-projects/icons/sketch-mixer/icon.svg
-tags:
+featuredTags:
   - Design
   - Development
 cta: https://sketch-mixer.vercel.app/

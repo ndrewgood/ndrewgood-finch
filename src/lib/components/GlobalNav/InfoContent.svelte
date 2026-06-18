@@ -14,10 +14,10 @@
 	}
 </script>
 
-<div class="flex flex-row gap-5 p-8 mt-4">
+<div class="mt-2 flex flex-col items-center gap-5 p-8 min-[700px]:flex-row min-[700px]:items-start">
 	<InfoPhotoCarousel />
 	<div class="flex flex-col gap-4">
-		<p class="text-lg leading-[24px] text-stone-400">
+		<p class="mt-0 text-lg leading-[24px] text-stone-400 min-[700px]:mt-4">
 			I'm <span class="text-stone-900">Andrew Goodridge</span>, a designer and web developer who loves
 			to make digital products of all shapes and sizes. I currently work at
 			<span class="text-stone-900">Google</span> as an Interaction designer in NYC.
@@ -36,7 +36,7 @@
 	<div class="h-line-light w-[250px]"></div>
 </div>
 
-<div class="flex flex-col gap-3 p-8">
+<div class="flex flex-col gap-3 p-6 min-[700px]:p-8">
 	{#each experience as entry (entry.label)}
 		<ExperienceRow
 			{entry}
@@ -46,7 +46,7 @@
 	{/each}
 </div>
 
-<div class="flex justify-center mb-8">
+<div class="flex justify-center pb-12">
 	<Button
 		variant="text"
 		iconHover
@@ -61,4 +61,9 @@
 	>
 		View full resume
 	</Button>
+</div>
+
+<div class="flex flex-col gap-2 mt-8">
+	<h3 class="text-center">Colophon</h3>
+	<div class="h-line-light w-[250px]"></div>
 </div>

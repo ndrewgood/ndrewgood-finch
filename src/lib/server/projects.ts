@@ -1,6 +1,6 @@
 import yaml from 'js-yaml';
 
-import type { AllProjectListItem, FeaturedProjectData } from '$lib/types/project';
+import type { AllProjectListItem, FeaturedProjectData, ProjectListTag } from '$lib/types/project';
 
 const rawYamlFiles = import.meta.glob<string>('../../content/**/*.yaml', {
 	eager: true,
@@ -18,7 +18,9 @@ type ProjectYaml = {
 	title?: string;
 	shortDescription?: string;
 	description?: string;
-	tags?: string[];
+	hide?: boolean;
+	tags?: ProjectListTag[];
+	featuredTags?: string[];
 	videoId?: string;
 	highlightColor?: string;
 	cta?: string;
@@ -74,9 +76,24 @@ function getIconSvg(slug: string): string {
 	return key ? normalizeProjectIconSvg(projectIconFiles[key]) : '';
 }
 
+const SHORT_MONTHS = [
+	'Jan',
+	'Feb',
+	'Mar',
+	'Apr',
+	'May',
+	'Jun',
+	'Jul',
+	'Aug',
+	'Sept',
+	'Oct',
+	'Nov',
+	'Dec'
+] as const;
+
 function formatEndDate(iso: string): string {
 	const date = new Date(`${iso}T00:00:00`);
-	return date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+	return `${SHORT_MONTHS[date.getMonth()]} ${date.getFullYear()}`;
 }
 
 function toAllProjectListItem(slug: string, project: ProjectYaml): AllProjectListItem | null {
@@ -92,6 +109,8 @@ function toAllProjectListItem(slug: string, project: ProjectYaml): AllProjectLis
 		description: project.description,
 		iconSvg: getIconSvg(slug),
 		endDateLabel: formatEndDate(endDate),
+		tags: project.tags ?? [],
+		...(project.videoId ? { videoId: project.videoId } : {}),
 		cta: project.cta ?? '',
 		ctaText: project.ctaText ?? 'Visit site'
 	};
@@ -108,7 +127,7 @@ export function getFeaturedProjects(): FeaturedProjectData[] {
 				title: project.title,
 				description: project.description,
 				iconSvg: getIconSvg(slug),
-				tags: project.tags ?? [],
+				tags: project.featuredTags ?? [],
 				cta: project.cta ?? '',
 				ctaText: project.ctaText ?? 'Visit site'
 			};
@@ -130,7 +149,7 @@ export function getAllProjects(): AllProjectListItem[] {
 	return getAllProjectSlugs()
 		.map((slug) => {
 			const project = getProjectYaml(slug);
-			if (!project) return null;
+			if (!project || project.hide) return null;
 			return { item: toAllProjectListItem(slug, project), endDate: toIsoDateString(project.endDate) };
 		})
 		.filter(

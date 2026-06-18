@@ -33,7 +33,7 @@
 
 @layer base {
 	html {
-		@apply bg-stone-100 font-sans antialiased;
+		@apply bg-blue-500 font-sans antialiased;
 	}
 
 	::selection {
@@ -80,7 +80,7 @@
 @layer components {
 	/* Display text */
 	.display {
-		@apply font-display text-2xl font-medium leading-tight text-stone-500;
+		@apply font-display text-xl px-6 min-[700px]:text-2xl font-medium leading-tight text-stone-500;
 	}
 
 	.display[data-hero-rich-text] strong {
@@ -137,5 +137,65 @@
 	.nav-panel-scroll::-webkit-scrollbar-thumb {
 		background-color: var(--color-stone-400);
 		border-radius: 9999px;
+	}
+
+	.swap-layer {
+		transition:
+			opacity 200ms var(--ease-out-cubic),
+			transform 200ms var(--ease-out-cubic),
+			filter 200ms var(--ease-out-cubic);
+	}
+
+	.swap-text {
+		transition: width 200ms var(--ease-out-cubic);
+	}
+
+	.swap-layer--no-transition {
+		transition: none;
+	}
+
+	.swap-layer--shown {
+		opacity: 1;
+		transform: translateY(0);
+		filter: blur(0);
+	}
+
+	.swap-layer--exit-hidden {
+		opacity: 0;
+		transform: translateY(-0.75rem);
+		filter: blur(2px);
+		pointer-events: none;
+	}
+
+	.swap-layer--enter-hidden {
+		opacity: 0;
+		transform: translateY(0.75rem);
+		filter: blur(2px);
+		pointer-events: none;
+	}
+
+	.swap-icon--shown {
+		opacity: 0.3;
+		transform: translateY(0);
+		filter: blur(0);
+	}
+
+	button:hover .swap-icon--shown {
+		opacity: 0.8;
+	}
+
+	.stagger-fade-in {
+		--stagger-delay: 0ms;
+		animation: stagger-fade-in 500ms var(--ease-out-cubic) var(--stagger-delay) both;
+	}
+
+	@keyframes stagger-fade-in {
+		from {
+			opacity: 0;
+		}
+
+		to {
+			opacity: 1;
+		}
 	}
 }

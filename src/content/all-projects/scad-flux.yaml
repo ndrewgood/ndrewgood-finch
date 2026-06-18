@@ -1,8 +1,11 @@
 title: SCAD FLUX
 shortDescription: Website
 description: Website for SCAD’s UX design club
+hide: false
 icon: /content/all-projects/icons/scad-flux/icon.svg
 tags:
+  - Coming Soon
+featuredTags:
   - Design
   - Development
 ctaText: Visit site
