@@ -44,9 +44,11 @@
 		}
 	}
 
-	/* iOS: keep fixed footer below the viewport until scroll-linked JS takes over */
+	/* iOS WebKit: footer starts off-screen so Safari doesn't sample blue at the toolbar */
 	html.ios-webkit .site-footer {
-		bottom: -500px;
+		transform: translateY(100%);
+		visibility: hidden;
+		will-change: transform;
 	}
 
 	::selection {

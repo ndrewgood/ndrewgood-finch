@@ -10,15 +10,13 @@
 	import { openNavPanel } from '$lib/nav.svelte';
 
 	let footerEl = $state<HTMLElement | undefined>();
-	let revealProgress = $state(0);
-	let iosReveal = $state(false);
 	let syncRaf = 0;
 
-	function isIOS() {
-		return /iP(hone|od|ad)/.test(navigator.userAgent);
+	function isIOSWebKit() {
+		return document.documentElement.classList.contains('ios-webkit');
 	}
 
-	function getRevealProgress() {
+	function getFooterRevealProgress() {
 		const maxScroll = Math.max(
 			0,
 			document.documentElement.scrollHeight - window.innerHeight
@@ -31,38 +29,63 @@
 		return (window.scrollY - revealStart) / FOOTER_HEIGHT;
 	}
 
-	function syncReveal() {
-		if (!iosReveal) return;
+	function applyFooterReveal(progress: number) {
+		if (!footerEl) return;
+
+		if (progress <= 0) {
+			footerEl.style.transform = 'translateY(100%)';
+			footerEl.style.visibility = 'hidden';
+			return;
+		}
+
+		footerEl.style.visibility = 'visible';
+		footerEl.style.transform = `translateY(${(1 - progress) * 100}%)`;
+	}
+
+	function syncIOSFooterReveal() {
+		if (!footerEl || !isIOSWebKit()) return;
 
 		cancelAnimationFrame(syncRaf);
 		syncRaf = requestAnimationFrame(() => {
-			revealProgress = getRevealProgress();
-			if (!footerEl) return;
-			footerEl.style.bottom = `${-(1 - revealProgress) * FOOTER_HEIGHT}px`;
+			applyFooterReveal(getFooterRevealProgress());
 		});
 	}
 
+	function scheduleSyncBurst() {
+		syncIOSFooterReveal();
+		requestAnimationFrame(syncIOSFooterReveal);
+		requestAnimationFrame(() => requestAnimationFrame(syncIOSFooterReveal));
+	}
+
 	onMount(() => {
-		iosReveal = isIOS();
-		if (!iosReveal) return;
+		if (!isIOSWebKit()) return;
 
-		syncReveal();
+		scheduleSyncBurst();
 
-		const onScroll = () => syncReveal();
-		const onPageshow = () => syncReveal();
+		const onScroll = () => syncIOSFooterReveal();
+		const onPageshow = () => scheduleSyncBurst();
 
 		window.addEventListener('scroll', onScroll, { passive: true });
-		window.addEventListener('resize', syncReveal);
+		window.addEventListener('resize', syncIOSFooterReveal);
 		window.addEventListener('pageshow', onPageshow);
-		window.addEventListener('load', syncReveal, { once: true });
+		window.addEventListener('load', scheduleSyncBurst, { once: true });
+
+		// iOS can restore scroll position after initial layout
+		const restoreTimers = [100, 300, 600].map((delay) =>
+			setTimeout(scheduleSyncBurst, delay)
+		);
 
 		return () => {
 			cancelAnimationFrame(syncRaf);
 			window.removeEventListener('scroll', onScroll);
-			window.removeEventListener('resize', syncReveal);
+			window.removeEventListener('resize', syncIOSFooterReveal);
 			window.removeEventListener('pageshow', onPageshow);
+			for (const timer of restoreTimers) clearTimeout(timer);
 
-			if (footerEl) footerEl.style.bottom = '';
+			if (footerEl) {
+				footerEl.style.transform = '';
+				footerEl.style.visibility = '';
+			}
 		};
 	});
 </script>
