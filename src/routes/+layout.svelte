@@ -7,7 +7,10 @@
 	let { data, children } = $props();
 </script>
 
-<svelte:head><link rel="icon" href={favicon} /></svelte:head>
+<svelte:head>
+	<link rel="icon" href={favicon} />
+	<meta name="theme-color" content="#f5f5f4" />
+</svelte:head>
 <GlobalNav experience={data.experience} pastSites={data.pastSites} />
 <main>
 	{@render children()}

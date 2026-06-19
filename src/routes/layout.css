@@ -38,7 +38,8 @@
 
 	/* Safari-only: overscroll / rubber-band shows html background */
 	@supports (hanging-punctuation: first) and (font: -apple-system-body) and (-webkit-appearance: none) {
-		html {
+		html,
+		body {
 			@apply bg-stone-100;
 		}
 	}
