@@ -3,12 +3,72 @@
 </script>
 
 <script lang="ts">
+	import { onMount } from 'svelte';
+
 	import peace from '$lib/assets/peace.svg';
 	import { Button } from '$lib/components';
 	import { openNavPanel } from '$lib/nav.svelte';
+
+	let footerEl = $state<HTMLElement | undefined>();
+	let revealProgress = $state(0);
+	let iosReveal = $state(false);
+	let syncRaf = 0;
+
+	function isIOS() {
+		return /iP(hone|od|ad)/.test(navigator.userAgent);
+	}
+
+	function getRevealProgress() {
+		const maxScroll = Math.max(
+			0,
+			document.documentElement.scrollHeight - window.innerHeight
+		);
+		const revealStart = maxScroll - FOOTER_HEIGHT;
+
+		if (window.scrollY <= revealStart) return 0;
+		if (window.scrollY >= maxScroll) return 1;
+
+		return (window.scrollY - revealStart) / FOOTER_HEIGHT;
+	}
+
+	function syncReveal() {
+		if (!iosReveal) return;
+
+		cancelAnimationFrame(syncRaf);
+		syncRaf = requestAnimationFrame(() => {
+			revealProgress = getRevealProgress();
+			if (!footerEl) return;
+			footerEl.style.bottom = `${-(1 - revealProgress) * FOOTER_HEIGHT}px`;
+		});
+	}
+
+	onMount(() => {
+		iosReveal = isIOS();
+		if (!iosReveal) return;
+
+		syncReveal();
+
+		const onScroll = () => syncReveal();
+		const onPageshow = () => syncReveal();
+
+		window.addEventListener('scroll', onScroll, { passive: true });
+		window.addEventListener('resize', syncReveal);
+		window.addEventListener('pageshow', onPageshow);
+		window.addEventListener('load', syncReveal, { once: true });
+
+		return () => {
+			cancelAnimationFrame(syncRaf);
+			window.removeEventListener('scroll', onScroll);
+			window.removeEventListener('resize', syncReveal);
+			window.removeEventListener('pageshow', onPageshow);
+
+			if (footerEl) footerEl.style.bottom = '';
+		};
+	});
 </script>
 
 <footer
+	bind:this={footerEl}
 	class="site-footer fixed inset-x-0 bottom-0 z-0 flex flex-col items-center justify-center gap-3 bg-blue-500"
 	style:height="{FOOTER_HEIGHT}px"
 >

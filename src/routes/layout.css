@@ -44,6 +44,11 @@
 		}
 	}
 
+	/* iOS: keep fixed footer below the viewport until scroll-linked JS takes over */
+	html.ios-webkit .site-footer {
+		bottom: -500px;
+	}
+
 	::selection {
 		@apply bg-stone-200;
 	  }
