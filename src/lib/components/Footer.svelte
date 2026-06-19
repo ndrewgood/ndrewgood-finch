@@ -1,8 +1,5 @@
 <script lang="ts" module>
 	export const FOOTER_HEIGHT = 500;
-
-	const THEME_STONE_100 = '#f5f5f4';
-	const THEME_BLUE_500 = '#3b82f6';
 </script>
 
 <script lang="ts">
@@ -13,9 +10,10 @@
 	import { openNavPanel } from '$lib/nav.svelte';
 
 	let footerEl = $state<HTMLElement | undefined>();
+	let syncRaf = 0;
 
 	function isIOSWebKit() {
-		return /iP(hone|od|ad)/.test(navigator.userAgent);
+		return document.documentElement.classList.contains('ios-webkit');
 	}
 
 	function getFooterRevealProgress() {
@@ -31,47 +29,63 @@
 		return (window.scrollY - revealStart) / FOOTER_HEIGHT;
 	}
 
-	function setThemeColor(color: string) {
-		let meta = document.querySelector<HTMLMetaElement>('meta[name="theme-color"]');
-		if (!meta) {
-			meta = document.createElement('meta');
-			meta.name = 'theme-color';
-			document.head.appendChild(meta);
+	function applyFooterReveal(progress: number) {
+		if (!footerEl) return;
+
+		if (progress <= 0) {
+			footerEl.style.transform = 'translateY(100%)';
+			footerEl.style.visibility = 'hidden';
+			return;
 		}
 
-		if (meta.content !== color) {
-			meta.content = color;
-		}
+		footerEl.style.visibility = 'visible';
+		footerEl.style.transform = `translateY(${(1 - progress) * 100}%)`;
 	}
 
 	function syncIOSFooterReveal() {
-		if (!footerEl) return;
+		if (!footerEl || !isIOSWebKit()) return;
 
-		const progress = getFooterRevealProgress();
-		footerEl.style.transform = `translateY(${(1 - progress) * 100}%)`;
-		setThemeColor(progress > 0.35 ? THEME_BLUE_500 : THEME_STONE_100);
+		cancelAnimationFrame(syncRaf);
+		syncRaf = requestAnimationFrame(() => {
+			applyFooterReveal(getFooterRevealProgress());
+		});
+	}
+
+	function scheduleSyncBurst() {
+		syncIOSFooterReveal();
+		requestAnimationFrame(syncIOSFooterReveal);
+		requestAnimationFrame(() => requestAnimationFrame(syncIOSFooterReveal));
 	}
 
 	onMount(() => {
 		if (!isIOSWebKit()) return;
 
-		document.documentElement.dataset.iosWebkit = '';
-
-		syncIOSFooterReveal();
+		scheduleSyncBurst();
 
 		const onScroll = () => syncIOSFooterReveal();
-		const onResize = () => syncIOSFooterReveal();
+		const onPageshow = () => scheduleSyncBurst();
 
 		window.addEventListener('scroll', onScroll, { passive: true });
-		window.addEventListener('resize', onResize);
+		window.addEventListener('resize', syncIOSFooterReveal);
+		window.addEventListener('pageshow', onPageshow);
+		window.addEventListener('load', scheduleSyncBurst, { once: true });
+
+		// iOS can restore scroll position after initial layout
+		const restoreTimers = [100, 300, 600].map((delay) =>
+			setTimeout(scheduleSyncBurst, delay)
+		);
 
 		return () => {
-			delete document.documentElement.dataset.iosWebkit;
+			cancelAnimationFrame(syncRaf);
 			window.removeEventListener('scroll', onScroll);
-			window.removeEventListener('resize', onResize);
+			window.removeEventListener('resize', syncIOSFooterReveal);
+			window.removeEventListener('pageshow', onPageshow);
+			for (const timer of restoreTimers) clearTimeout(timer);
 
-			if (footerEl) footerEl.style.transform = '';
-			setThemeColor(THEME_STONE_100);
+			if (footerEl) {
+				footerEl.style.transform = '';
+				footerEl.style.visibility = '';
+			}
 		};
 	});
 </script>

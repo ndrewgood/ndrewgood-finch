@@ -44,8 +44,10 @@
 		}
 	}
 
-	/* iOS WebKit: footer is scroll-linked off-screen until the reveal zone (see Footer.svelte) */
-	html[data-ios-webkit] .site-footer {
+	/* iOS WebKit: footer starts off-screen so Safari doesn't sample blue at the toolbar */
+	html.ios-webkit .site-footer {
+		transform: translateY(100%);
+		visibility: hidden;
 		will-change: transform;
 	}
 
