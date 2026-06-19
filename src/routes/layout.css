@@ -44,6 +44,11 @@
 		}
 	}
 
+	/* iOS WebKit: footer is scroll-linked off-screen until the reveal zone (see Footer.svelte) */
+	html[data-ios-webkit] .site-footer {
+		will-change: transform;
+	}
+
 	::selection {
 		@apply bg-stone-200;
 	  }
