@@ -36,6 +36,13 @@
 		@apply bg-blue-500 font-sans antialiased;
 	}
 
+	/* Safari-only: overscroll / rubber-band shows html background */
+	@supports (hanging-punctuation: first) and (font: -apple-system-body) and (-webkit-appearance: none) {
+		html {
+			@apply bg-stone-100;
+		}
+	}
+
 	::selection {
 		@apply bg-stone-200;
 	  }
@@ -121,9 +128,10 @@
 	}
 
 	.nav-panel-scroll {
+		scrollbar-gutter: stable;
 		scrollbar-width: thin;
 		scrollbar-color: var(--color-stone-400) transparent;
-		padding-right: 8px;
+		overscroll-behavior: contain;
 	}
 
 	.nav-panel-scroll::-webkit-scrollbar {

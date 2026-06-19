@@ -297,7 +297,7 @@
 	<button
 		bind:this={scrimEl}
 		type="button"
-		class="fixed inset-0 z-[9] h-[100vh] w-[100vw] cursor-default border-0 bg-stone-900/20 p-0 opacity-0 backdrop-blur-[3px]"
+		class="fixed inset-0 z-[9] cursor-default border-0 bg-stone-900/20 p-0 opacity-0 backdrop-blur-[3px]"
 		aria-label="Close navigation"
 		onclick={closeNav}
 	></button>
