@@ -44,13 +44,6 @@
 		}
 	}
 
-	/* iOS WebKit: footer starts off-screen so Safari doesn't sample blue at the toolbar */
-	html.ios-webkit .site-footer {
-		transform: translateY(100%);
-		visibility: hidden;
-		will-change: transform;
-	}
-
 	::selection {
 		@apply bg-stone-200;
 	  }

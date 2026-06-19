@@ -3,95 +3,12 @@
 </script>
 
 <script lang="ts">
-	import { onMount } from 'svelte';
-
 	import peace from '$lib/assets/peace.svg';
 	import { Button } from '$lib/components';
 	import { openNavPanel } from '$lib/nav.svelte';
-
-	let footerEl = $state<HTMLElement | undefined>();
-	let syncRaf = 0;
-
-	function isIOSWebKit() {
-		return document.documentElement.classList.contains('ios-webkit');
-	}
-
-	function getFooterRevealProgress() {
-		const maxScroll = Math.max(
-			0,
-			document.documentElement.scrollHeight - window.innerHeight
-		);
-		const revealStart = maxScroll - FOOTER_HEIGHT;
-
-		if (window.scrollY <= revealStart) return 0;
-		if (window.scrollY >= maxScroll) return 1;
-
-		return (window.scrollY - revealStart) / FOOTER_HEIGHT;
-	}
-
-	function applyFooterReveal(progress: number) {
-		if (!footerEl) return;
-
-		if (progress <= 0) {
-			footerEl.style.transform = 'translateY(100%)';
-			footerEl.style.visibility = 'hidden';
-			return;
-		}
-
-		footerEl.style.visibility = 'visible';
-		footerEl.style.transform = `translateY(${(1 - progress) * 100}%)`;
-	}
-
-	function syncIOSFooterReveal() {
-		if (!footerEl || !isIOSWebKit()) return;
-
-		cancelAnimationFrame(syncRaf);
-		syncRaf = requestAnimationFrame(() => {
-			applyFooterReveal(getFooterRevealProgress());
-		});
-	}
-
-	function scheduleSyncBurst() {
-		syncIOSFooterReveal();
-		requestAnimationFrame(syncIOSFooterReveal);
-		requestAnimationFrame(() => requestAnimationFrame(syncIOSFooterReveal));
-	}
-
-	onMount(() => {
-		if (!isIOSWebKit()) return;
-
-		scheduleSyncBurst();
-
-		const onScroll = () => syncIOSFooterReveal();
-		const onPageshow = () => scheduleSyncBurst();
-
-		window.addEventListener('scroll', onScroll, { passive: true });
-		window.addEventListener('resize', syncIOSFooterReveal);
-		window.addEventListener('pageshow', onPageshow);
-		window.addEventListener('load', scheduleSyncBurst, { once: true });
-
-		// iOS can restore scroll position after initial layout
-		const restoreTimers = [100, 300, 600].map((delay) =>
-			setTimeout(scheduleSyncBurst, delay)
-		);
-
-		return () => {
-			cancelAnimationFrame(syncRaf);
-			window.removeEventListener('scroll', onScroll);
-			window.removeEventListener('resize', syncIOSFooterReveal);
-			window.removeEventListener('pageshow', onPageshow);
-			for (const timer of restoreTimers) clearTimeout(timer);
-
-			if (footerEl) {
-				footerEl.style.transform = '';
-				footerEl.style.visibility = '';
-			}
-		};
-	});
 </script>
 
 <footer
-	bind:this={footerEl}
 	class="site-footer fixed inset-x-0 bottom-0 z-0 flex flex-col items-center justify-center gap-3 bg-blue-500"
 	style:height="{FOOTER_HEIGHT}px"
 >
