@@ -5,25 +5,12 @@
 	import MuxVideo from './MuxVideo.svelte';
 	import ProjectTag from './ProjectTag.svelte';
 
-	let { title, description, iconSvg, tags, videoId, highlightColor, cta, ctaText }: FeaturedProjectData =
-		$props();
+	let { title, description, iconSvg, tags, videoId, cta, ctaText }: FeaturedProjectData = $props();
 
 	let isPaused = $state(true);
 </script>
 
-<div class="group/featured relative">
-	{#if videoId && highlightColor}
-		<div
-			class={[
-				'pointer-events-none absolute inset-0 -z-10 origin-center opacity-0 blur-xl transition-[background-color,opacity,top,right,bottom,left] duration-300 ease-out-cubic group-has-[.video-shell:hover]/featured:opacity-50',
-				isPaused && 'top-21 right-5 bottom-20 left-5',
-				!isPaused && 'top-19 right-3 bottom-18 left-3'
-			]}
-			style:background-color={highlightColor}
-			aria-hidden="true"
-		></div>
-	{/if}
-
+<div class="relative">
 	<div class="relative flex flex-col gap-6">
 		<div class="flex flex-row items-center justify-between">
 			<div class="flex flex-row gap-3">

@@ -7,6 +7,7 @@
 
 <script lang="ts">
 	import Icon from './Icon.svelte';
+	import { nav } from '$lib/nav.svelte';
 
 	type Props = {
 		target?: HTMLElement;
@@ -25,6 +26,8 @@
 	}: Props = $props();
 
 	let visible = $state(false);
+
+	const showControl = $derived(visible && !nav.overlayOpen);
 
 	function updateVisibility() {
 		if (!target) {
@@ -59,9 +62,9 @@
 <div
 	class={[
 		'group/control fixed bottom-4 left-1/2 z-20 flex -translate-x-1/2 flex-row gap-1 rounded-2xl bg-stone-200/80 p-1.5 backdrop-blur-md select-none transition-opacity duration-150 ease-out-cubic min-[800px]:top-1/2 min-[800px]:bottom-auto min-[800px]:left-4 min-[800px]:rounded-xl min-[800px]:translate-x-0 min-[800px]:-translate-y-1/2 min-[800px]:flex-col min-[800px]:gap-0.5',
-		visible ? 'pointer-events-auto opacity-100' : 'pointer-events-none opacity-0'
+		showControl ? 'pointer-events-auto opacity-100' : 'pointer-events-none opacity-0'
 	]}
-	aria-hidden={!visible}
+	aria-hidden={!showControl}
 >
 	<button
 		type="button"

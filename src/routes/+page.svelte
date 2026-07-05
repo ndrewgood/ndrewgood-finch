@@ -26,7 +26,7 @@
 
 <div class="relative z-[1] bg-stone-100" style:margin-bottom="{FOOTER_HEIGHT}px">
 	<section
-		class="mx-auto flex h-[700px] max-w-lg flex-col items-center justify-center gap-6 py-20"
+		class="mx-auto flex min-[700px]:h-[700px] h-[650px] max-w-lg flex-col items-center justify-center gap-6 py-20"
 		style="--hero-word-opacity-duration: {HERO_WORD_OPACITY_MS}ms; --hero-word-slide-duration: {HERO_WORD_SLIDE_MS}ms; --hero-button-delay: {HERO_BUTTON_DELAY_MS}ms;"
 	>
 		{#if data.heroTextHtml}

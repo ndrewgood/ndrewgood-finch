@@ -16,11 +16,13 @@
 	let {
 		experience = [],
 		pastSites = [],
-		colophonHtml = null
+		colophonHtml = null,
+		infoBioHtml = null
 	}: {
 		experience?: ExperienceEntry[];
 		pastSites?: PastSiteEntry[];
 		colophonHtml?: string | null;
+		infoBioHtml?: string | null;
 	} = $props();
 
 	type NavPosition = 'first' | 'middle' | 'last';
@@ -59,6 +61,7 @@
 	const navEdgeInset = 16;
 
 	let viewportWidth = $state(0);
+	let viewportHeight = $state(0);
 
 	const navItems: { label: NavPanel; position: NavPosition; icon: IconName }[] = [
 		{ label: 'Info', position: 'first', icon: 'person_text' },
@@ -113,6 +116,15 @@
 
 	function clampNavWidth(width: number) {
 		return Math.min(width, getMaxNavWidth());
+	}
+
+	function getMaxNavHeight() {
+		if (!viewportHeight) return Infinity;
+		return Math.max(0, viewportHeight - navEdgeInset * 2);
+	}
+
+	function clampNavHeight(height: number) {
+		return Math.min(height, getMaxNavHeight());
 	}
 
 	function getPanelSize(panel: NavPanel) {
@@ -171,18 +183,20 @@
 
 		if (isClosedIdle()) {
 			el.style.width = `${clampNavWidth(closedW)}px`;
-			el.style.height = `${closedH}px`;
+			el.style.height = `${clampNavHeight(closedH)}px`;
 		}
 	}
 
 	onMount(() => {
 		viewportWidth = window.innerWidth;
+		viewportHeight = window.innerHeight;
 		measureClosedShell();
 		measured = true;
 
 		let resizeRaf = 0;
 		const onViewportChange = () => {
 			viewportWidth = window.innerWidth;
+			viewportHeight = window.innerHeight;
 			cancelAnimationFrame(resizeRaf);
 			resizeRaf = requestAnimationFrame(() => {
 				if (isClosedIdle()) {
@@ -201,6 +215,12 @@
 			observer.disconnect();
 			cancelAnimationFrame(resizeRaf);
 		};
+	});
+
+	$effect(() => {
+		if (!browser) return;
+
+		nav.overlayOpen = openVisual;
 	});
 
 	$effect(() => {
@@ -270,6 +290,7 @@
 		if (!browser || !measured || !navContainer) return;
 
 		void viewportWidth;
+		void viewportHeight;
 		void renderedPanel;
 		void isClosing;
 
@@ -281,13 +302,13 @@
 			const size = getPanelSize(nav.panel);
 			if (!size) return;
 			width = clampNavWidth(size.width);
-			height = size.height;
+			height = clampNavHeight(size.height);
 		} else if (openVisual) {
 			width = clampNavWidth(closedW);
-			height = closedH;
+			height = clampNavHeight(closedH);
 		} else {
 			width = clampNavWidth(closedW);
-			height = closedH;
+			height = clampNavHeight(closedH);
 		}
 
 		const playback = animate(
@@ -312,7 +333,7 @@
 
 <div
 	bind:this={navContainer}
-	class='fixed top-4 left-1/2 z-10 flex max-w-[calc(100vw-32px)] -translate-x-1/2 flex-col rounded-xl'
+	class='fixed top-4 left-1/2 z-10 flex max-h-[calc(100dvh-32px)] max-w-[calc(100vw-32px)] -translate-x-1/2 flex-col rounded-xl'
 >
     <div
         class={[
@@ -391,7 +412,7 @@
                             style:width="{contentWidth}px"
                         >
                             {#if renderedPanel === 'Info'}
-                                <InfoContent {experience} {colophonHtml} />
+                                <InfoContent {experience} {colophonHtml} {infoBioHtml} />
                             {:else if renderedPanel === 'Spaces'}
                                 <SpacesContent {pastSites} />
                             {:else if renderedPanel === 'Contact'}

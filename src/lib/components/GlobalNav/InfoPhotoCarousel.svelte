@@ -28,18 +28,21 @@
 
 	let autoRotationEnabled = true;
 	let autoRotateInterval: ReturnType<typeof setInterval> | undefined;
+	let canHover = $state(false);
+
+	const isHoverActive = $derived(isHovered && canHover);
 
 	const previewIndex = $derived((currentIndex + 1) % infoPhotoUrls.length);
 
 	const currentRotation = $derived(
-		animCurrentRotation ?? (isHovered ? -HOVER_FAN_ANGLE : 0)
+		animCurrentRotation ?? (isHoverActive ? -HOVER_FAN_ANGLE : 0)
 	);
 	const nextRotation = $derived(
-		animNextRotation ?? (isHovered ? HOVER_FAN_ANGLE : IDLE_NEXT_ROTATION)
+		animNextRotation ?? (isHoverActive ? HOVER_FAN_ANGLE : IDLE_NEXT_ROTATION)
 	);
 	const currentZ = $derived(animCurrentZ ?? 2);
 	const nextZ = $derived(animNextZ ?? 1);
-	const nextOpacity = $derived(!isHovered && !isAnimating ? 0.4 : 1);
+	const nextOpacity = $derived(!isHoverActive && !isAnimating ? 0.4 : 1);
 
 	const photoCardClass = $derived(
 		[
@@ -111,6 +114,8 @@
 	}
 
 	onMount(async () => {
+		canHover = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+
 		await Promise.all(
 			infoPhotoUrls.map((url) => {
 				const image = new Image();
@@ -130,7 +135,7 @@
 		if (!isReady || isAnimating || infoPhotoUrls.length <= 1) return;
 
 		isAnimating = true;
-		const startingFromHover = isHovered;
+		const startingFromHover = isHoverActive;
 
 		animCurrentRotation = startingFromHover ? -HOVER_FAN_ANGLE : 0;
 		animNextRotation = startingFromHover ? HOVER_FAN_ANGLE : IDLE_NEXT_ROTATION;
@@ -162,7 +167,7 @@
 		animCurrentZ = null;
 		animNextZ = null;
 		isAnimating = false;
-		isHovered = isPointerInside;
+		isHovered = canHover && isPointerInside;
 		await tick();
 		await nextFrame();
 		suppressTransitions = false;
@@ -175,7 +180,7 @@
 
 	function handlePointerEnter() {
 		isPointerInside = true;
-		if (!isAnimating) isHovered = true;
+		if (!isAnimating && canHover) isHovered = true;
 	}
 
 	function handlePointerLeave() {

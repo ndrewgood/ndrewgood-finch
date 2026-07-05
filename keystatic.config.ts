@@ -14,6 +14,18 @@ export default config({
 				})
 			}
 		}),
+		infoBio: singleton({
+			label: 'Info bio',
+			path: 'src/content/singletons/info-bio',
+			format: { data: 'json', contentField: 'text' },
+			schema: {
+				text: fields.mdx({
+					label: 'Info bio',
+					description:
+						'Bio copy for the Info panel. Use bold for emphasized names and terms — they render as dark text, not bold.'
+				})
+			}
+		}),
 		featuredProjects: singleton({
 			label: 'Featured projects',
 			path: 'src/content/singletons/featured-projects',

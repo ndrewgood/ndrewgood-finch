@@ -5,119 +5,119 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 
-	import peace from '$lib/assets/peace.svg';
 	import { Button } from '$lib/components';
 	import { openNavPanel } from '$lib/nav.svelte';
 
-	let footerEl = $state<HTMLElement | undefined>();
-	let syncRaf = 0;
+	const REVEAL_DISTANCE = 200;
+	const RESET_DISTANCE = 500;
+	const CHAT_WORD_STAGGER_MS = 100;
+	const CHAT_WORD_OPACITY_MS = 200;
+	const CHAT_WORD_SLIDE_MS = 400;
+	const CHAT_WORDS = ["Let's", 'chat!'] as const;
 
-	function isIOSWebKit() {
-		return document.documentElement.classList.contains('ios-webkit');
-	}
+	const restDelayMs = 400;
 
-	function getFooterRevealProgress() {
+	let headingRevealed = $state(false);
+
+	function getDistanceFromBottom() {
 		const maxScroll = Math.max(
 			0,
 			document.documentElement.scrollHeight - window.innerHeight
 		);
-		const revealStart = maxScroll - FOOTER_HEIGHT;
-
-		if (window.scrollY <= revealStart) return 0;
-		if (window.scrollY >= maxScroll) return 1;
-
-		return (window.scrollY - revealStart) / FOOTER_HEIGHT;
+		return maxScroll - window.scrollY;
 	}
 
-	function applyFooterReveal(progress: number) {
-		if (!footerEl) return;
+	function updateReveal() {
+		const distanceFromBottom = getDistanceFromBottom();
 
-		if (progress <= 0) {
-			footerEl.style.transform = 'translateY(100%)';
-			footerEl.style.visibility = 'hidden';
-			return;
+		if (distanceFromBottom <= REVEAL_DISTANCE) {
+			headingRevealed = true;
+		} else if (distanceFromBottom > RESET_DISTANCE) {
+			headingRevealed = false;
 		}
-
-		footerEl.style.visibility = 'visible';
-		footerEl.style.transform = `translateY(${(1 - progress) * 100}%)`;
-	}
-
-	function syncIOSFooterReveal() {
-		if (!footerEl || !isIOSWebKit()) return;
-
-		cancelAnimationFrame(syncRaf);
-		syncRaf = requestAnimationFrame(() => {
-			applyFooterReveal(getFooterRevealProgress());
-		});
-	}
-
-	function scheduleSyncBurst() {
-		syncIOSFooterReveal();
-		requestAnimationFrame(syncIOSFooterReveal);
-		requestAnimationFrame(() => requestAnimationFrame(syncIOSFooterReveal));
 	}
 
 	onMount(() => {
-		if (!isIOSWebKit()) return;
+		updateReveal();
 
-		scheduleSyncBurst();
-
-		const onScroll = () => syncIOSFooterReveal();
-		const onPageshow = () => scheduleSyncBurst();
-
-		window.addEventListener('scroll', onScroll, { passive: true });
-		window.addEventListener('resize', syncIOSFooterReveal);
-		window.addEventListener('pageshow', onPageshow);
-		window.addEventListener('load', scheduleSyncBurst, { once: true });
-
-		// iOS can restore scroll position after initial layout
-		const restoreTimers = [100, 300, 600].map((delay) =>
-			setTimeout(scheduleSyncBurst, delay)
-		);
+		window.addEventListener('scroll', updateReveal, { passive: true });
+		window.addEventListener('resize', updateReveal);
 
 		return () => {
-			cancelAnimationFrame(syncRaf);
-			window.removeEventListener('scroll', onScroll);
-			window.removeEventListener('resize', syncIOSFooterReveal);
-			window.removeEventListener('pageshow', onPageshow);
-			for (const timer of restoreTimers) clearTimeout(timer);
-
-			if (footerEl) {
-				footerEl.style.transform = '';
-				footerEl.style.visibility = '';
-			}
+			window.removeEventListener('scroll', updateReveal);
+			window.removeEventListener('resize', updateReveal);
 		};
 	});
 </script>
 
 <footer
-	bind:this={footerEl}
-	class="site-footer fixed inset-x-0 bottom-0 z-0 flex flex-col items-center justify-center gap-3 bg-blue-500"
-	style:height="{FOOTER_HEIGHT}px"
+	class="site-footer fixed backdrop-opacity-100 inset-x-0 bottom-0 z-0 flex flex-col items-center bg-blue-500 px-4 py-40"
+	style="--footer-word-opacity-duration: {CHAT_WORD_OPACITY_MS}ms; --footer-word-slide-duration: {CHAT_WORD_SLIDE_MS}ms; --footer-rest-delay: {restDelayMs}ms;"
 >
-	<img src={peace} alt="Peace" class="h-26 w-26" />
-	<h1 class="text-[40px] text-white">Let's chat!</h1>
-	<div class="mt-4 flex gap-3">
-		<Button
-			copyText="hey@ndrewgood.com"
-			shadow="shadow-[0_3px_0_0_rgba(0,0,0,0.3)]"
-			icon="content_copy_outline"
-			iconPosition="trailing"
-		>Copy email</Button>
-		<Button
-			shadow="shadow-[0_3px_0_0_rgba(0,0,0,0.3)]"
-			iconHover
-			icon="north_east"
-			iconPosition="trailing"
-			onclick={() => window.open('https://linkedin.com/in/ndrewgood', '_blank')}
-		>LinkedIn</Button>
+	<h1
+		class={['text-[56px] text-white', headingRevealed ? 'footer-chat--revealed' : '']}
+	>
+		{#each CHAT_WORDS as word, index (word)}
+			{#if index > 0}
+				{' '}
+			{/if}
+			<span
+				class="footer-chat-word"
+				style:--footer-word-delay="{index * CHAT_WORD_STAGGER_MS}ms"
+			>
+				{word}
+			</span>
+		{/each}
+	</h1>
+
+	<div
+		class={['footer-rest flex flex-col items-center gap-3', headingRevealed ? 'footer-rest--visible' : '']}
+	>
+		<div class="mt-4 flex gap-3">
+			<Button
+				copyText="hey@ndrewgood.com"
+				shadow="shadow-[0_3px_0_0_rgba(0,0,0,0.3)]"
+				icon="content_copy_outline"
+				iconPosition="trailing"
+			>Copy email</Button>
+			<Button
+				shadow="shadow-[0_3px_0_0_rgba(0,0,0,0.3)]"
+				iconHover
+				icon="north_east"
+				iconPosition="trailing"
+				onclick={() => window.open('https://linkedin.com/in/ndrewgood', '_blank')}
+			>LinkedIn</Button>
+		</div>
+		<p class="text-md font-display text-blue-300">
+			or... you can
+			<button
+				type="button"
+				class="cursor-pointer underline decoration-1 underline-offset-3 transition-all duration-150 ease-out-cubic hover:text-white"
+				onclick={() => openNavPanel('Contact')}
+			>send me a voice memo</button>!
+		</p>
 	</div>
-	<p class="text-md font-display text-blue-300">
-		or... you can
-		<button
-			type="button"
-			class="cursor-pointer underline decoration-1 underline-offset-3 transition-all duration-150 ease-out-cubic hover:text-white"
-			onclick={() => openNavPanel('Contact')}
-		>send me a voice memo</button>!
-	</p>
 </footer>
+
+<style>
+	.footer-chat-word {
+		display: inline-block;
+		opacity: 0;
+	}
+
+	.footer-chat--revealed .footer-chat-word {
+		animation:
+			hero-word-opacity var(--footer-word-opacity-duration) var(--ease-out-cubic)
+				var(--footer-word-delay, 0ms) forwards,
+			hero-word-slide var(--footer-word-slide-duration) var(--ease-out-cubic)
+				var(--footer-word-delay, 0ms) forwards;
+	}
+
+	.footer-rest {
+		opacity: 0;
+	}
+
+	.footer-rest--visible {
+		animation: page-load-fade-in 400ms var(--ease-out-cubic) var(--footer-rest-delay) forwards;
+	}
+</style>

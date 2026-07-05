@@ -5,8 +5,15 @@
 	import { Button } from '$lib/components';
 	import InfoPhotoCarousel from './InfoPhotoCarousel.svelte';
 
-	let { experience = [], colophonHtml = null }: { experience?: ExperienceEntry[]; colophonHtml?: string | null } =
-		$props();
+	let {
+		experience = [],
+		colophonHtml = null,
+		infoBioHtml = null
+	}: {
+		experience?: ExperienceEntry[];
+		colophonHtml?: string | null;
+		infoBioHtml?: string | null;
+	} = $props();
 
 	let expandedLabel = $state<string | null>(null);
 
@@ -17,19 +24,11 @@
 
 <div class="mt-2 flex flex-col items-center gap-5 p-8 min-[700px]:flex-row min-[700px]:items-start">
 	<InfoPhotoCarousel />
-	<div class="flex flex-col gap-4">
-		<p class="mt-0 text-lg leading-[24px] text-stone-400 min-[700px]:mt-4">
-			I'm <span class="text-stone-900">Andrew Goodridge</span>, a designer and web developer who loves
-			to make digital products of all shapes and sizes. I currently work at
-			<span class="text-stone-900">Google</span> as an Interaction designer in NYC.
-		</p>
-		<p class="text-lg leading-[24px] text-stone-400">
-			I've been making websites for over 10 years, some of which have been featured in
-			<span class="text-stone-900">showcases</span>,
-			<span class="text-stone-900">articles</span>, and
-			<span class="text-stone-900">publications</span>.
-		</p>
-	</div>
+	{#if infoBioHtml}
+		<div class="info-bio">
+			{@html infoBioHtml}
+		</div>
+	{/if}
 </div>
 
 <div class="flex flex-col gap-2 mt-8">
@@ -76,6 +75,45 @@
 {/if}
 
 <style>
+	.info-bio :global(p) {
+		font-size: 1.125rem;
+		line-height: 24px;
+		color: var(--color-stone-400);
+	}
+
+	.info-bio :global(p + p) {
+		margin-top: 1rem;
+	}
+
+	.info-bio :global(p:first-child) {
+		margin-top: 0;
+	}
+
+	@media (min-width: 700px) {
+		.info-bio :global(p:first-child) {
+			margin-top: 1rem;
+		}
+	}
+
+	.info-bio :global(strong) {
+		color: var(--color-stone-900);
+		font-weight: inherit;
+	}
+
+	.info-bio :global(a) {
+		font-size: 1.125rem;
+		line-height: 24px;
+		color: inherit;
+		text-decoration: underline;
+		text-decoration-color: var(--color-stone-300);
+		text-underline-offset: 3px;
+		transition: text-decoration-color 150ms var(--ease-out-cubic);
+	}
+
+	.info-bio :global(a:hover) {
+		text-decoration-color: var(--color-stone-800);
+	}
+
 	.colophon :global(p + p) {
 		margin-top: 0.5rem;
 	}
