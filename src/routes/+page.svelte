@@ -41,7 +41,7 @@
 		bind:this={allWorkSection}
 		class={[
 			'mx-auto flex flex-col items-center gap-6 pt-12 pb-52 w-full px-6',
-			layoutView === 'grid' ? 'max-w-[1000px]' : 'max-w-3xl'
+			layoutView === 'grid' ? 'max-w-[1100px]' : 'max-w-3xl'
 		]}
 	>
 		<div class="flex flex-col gap-3">

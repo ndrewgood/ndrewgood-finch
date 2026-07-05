@@ -39,6 +39,7 @@
 	"dependencies": {
 		"@keystatic/core": "^0.5.50",
 		"@mux/mux-player": "^3.13.0",
+		"firebase-admin": "^14.1.0",
 		"js-yaml": "^4.1.1",
 		"keystatic-sveltekit": "^1.2.0",
 		"marked": "^18.0.3",

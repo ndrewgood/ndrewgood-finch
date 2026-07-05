@@ -1,18 +1,11 @@
 <script lang="ts">
-	import type { IconName } from '$lib/assets/icons';
+	import { getProjectTagIcon } from '$lib/utils/project-tags';
 
 	import Icon from './Icon.svelte';
 
 	let { label }: { label: string } = $props();
 
-	const tagIcons: Record<string, IconName> = {
-		Design: 'design_services',
-		Development: 'code_xml',
-		'Physical Computing': 'developer_board',
-		'Physical computing': 'developer_board'
-	};
-
-	const icon = $derived(tagIcons[label]);
+	const icon = $derived(getProjectTagIcon(label));
 </script>
 
 <div

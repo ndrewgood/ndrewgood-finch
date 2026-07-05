@@ -10,6 +10,8 @@
 		inView?: boolean;
 		/** When false, hides playback controls so the parent can handle clicks. */
 		interactive?: boolean;
+		/** Called with a toggle function so parents can control playback. */
+		onRegisterToggle?: (toggle: () => void) => void;
 	};
 
 	let {
@@ -17,7 +19,8 @@
 		title = '',
 		isPaused = $bindable(true),
 		inView,
-		interactive = true
+		interactive = true,
+		onRegisterToggle
 	}: Props = $props();
 
 	let ready = $state(false);
@@ -112,6 +115,10 @@
 			player.pause();
 		}
 	}
+
+	$effect(() => {
+		onRegisterToggle?.(togglePlayback);
+	});
 
 	function scrubTo(clientX: number, slider: HTMLElement) {
 		const track = slider.querySelector<HTMLElement>('[data-progress-track]');

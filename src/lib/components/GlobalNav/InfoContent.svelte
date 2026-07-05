@@ -5,7 +5,8 @@
 	import { Button } from '$lib/components';
 	import InfoPhotoCarousel from './InfoPhotoCarousel.svelte';
 
-	let { experience = [] }: { experience?: ExperienceEntry[] } = $props();
+	let { experience = [], colophonHtml = null }: { experience?: ExperienceEntry[]; colophonHtml?: string | null } =
+		$props();
 
 	let expandedLabel = $state<string | null>(null);
 
@@ -67,3 +68,21 @@
 	<h3 class="text-center">Colophon</h3>
 	<div class="h-line-light w-[250px]"></div>
 </div>
+
+{#if colophonHtml}
+	<div class="colophon mx-auto mt-4 flex max-w-xl flex-col p-6 pb-24 text-center">
+		{@html colophonHtml}
+	</div>
+{/if}
+
+<style>
+	.colophon :global(p + p) {
+		margin-top: 0.5rem;
+	}
+
+	.colophon :global(a) {
+		color: inherit;
+		text-decoration: underline;
+		text-underline-offset: 3px;
+	}
+</style>

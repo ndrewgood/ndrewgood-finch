@@ -88,6 +88,18 @@ export default config({
 					}
 				)
 			}
+		}),
+		colophon: singleton({
+			label: 'Colophon',
+			path: 'src/content/singletons/colophon',
+			format: { data: 'yaml' },
+			schema: {
+				content: fields.document({
+					label: 'Content',
+					formatting: true,
+					links: true
+				})
+			}
 		})
 	},
 	collections: {

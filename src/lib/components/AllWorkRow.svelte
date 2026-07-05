@@ -2,6 +2,7 @@
 	import type { AllProjectListItem } from '$lib/types/project';
 
 	import Icon from './Icon.svelte';
+	import ProjectTagIcons from './ProjectTagIcons.svelte';
 
 	let {
 		title,
@@ -10,6 +11,7 @@
 		iconSvg,
 		endDateLabel,
 		tags,
+		featuredTags,
 		cta,
 		ctaText
 	}: AllProjectListItem = $props();
@@ -22,9 +24,10 @@
 		return rest ? rest.split(/\s+/) : [];
 	});
 
-	const hoverLabel = $derived(cta ? ctaText : 'Coming soon...');
+	const hoverLabel = $derived(ctaText);
 	const isNew = $derived(tags.includes('New'));
 	const isComingSoon = $derived(tags.includes('Coming Soon'));
+	const isInteractive = $derived(Boolean(cta));
 </script>
 
 <svelte:element
@@ -35,11 +38,13 @@
 	aria-label={cta ? `${title}. ${description}` : undefined}
 	aria-disabled={cta ? undefined : true}
 	class={[
-		'group flex w-full select-none flex-row items-center justify-between rounded-lg px-4 py-3 no-underline transition-all duration-[300ms] ease-out-cubic',
+		'flex w-full select-none flex-row items-center justify-between rounded-lg px-4 py-3 no-underline transition-all duration-[300ms] ease-out-cubic',
+		isInteractive ? 'group group-interactive cursor-pointer' : '',
 		isComingSoon
 			? 'scale-[98%] opacity-50'
-			: 'scale-[98%] hover:scale-100 hover:bg-stone-150 active:scale-100 active:bg-stone-200 hover:text-inherit active:text-inherit',
-		cta ? 'cursor-pointer' : 'cursor-not-allowed'
+			: isInteractive
+				? 'scale-[98%] hover:scale-100 hover:bg-stone-150 active:scale-100 active:bg-stone-200 hover:text-inherit active:text-inherit'
+				: 'scale-[98%]'
 	]}
 >
 	<div class="flex min-w-0 flex-row items-center gap-3">
@@ -63,20 +68,33 @@
 			</p>
 		</div>
 	</div>
-	<div class="flex shrink-0 items-center justify-end gap-0 pl-4 text-right font-display font-bold text-stone-500">
-		{#if isNew}
-			<span class="new-chip hidden min-[550px]:flex h-fit flex-row items-center rounded-lg bg-[#E2FCFF] px-3 py-1 font-display font-bold text-[#04434B]">
-				New!
-			</span>
-		{/if}
-		<div class="cta-swap grid justify-items-end">
-			<span class="swap-layer swap-layer--date col-start-1 row-start-1">{endDateLabel}</span>
-			<span class="swap-layer swap-layer--cta col-start-1 row-start-1 inline-flex items-center gap-1">
-				{hoverLabel}
-				{#if cta}
-					<Icon name="north_east" class="size-5" />
+	<div class="flex shrink-0 items-center justify-end pl-4 text-right font-display font-bold text-stone-500">
+		<div
+			class={isInteractive
+				? 'cta-swap relative inline-flex w-fit items-center justify-end'
+				: 'inline-flex items-center gap-3'}
+		>
+			<span
+				class={isInteractive
+					? 'swap-layer swap-layer--date inline-flex items-center gap-3'
+					: 'inline-flex items-center gap-3'}
+			>
+				{#if isNew}
+					<span
+						class="new-chip hidden min-[550px]:inline-flex shrink-0 flex-row items-center rounded-lg bg-[#E2FCFF] px-3 py-1 font-display font-bold text-[#04434B]"
+					>
+						New!
+					</span>
 				{/if}
+				<ProjectTagIcons tags={featuredTags} />
+				{endDateLabel}
 			</span>
+			{#if isInteractive}
+				<span class="swap-layer swap-layer--cta inline-flex items-center gap-1 whitespace-nowrap">
+					{hoverLabel}
+					<Icon name="north_east" class="size-5" />
+				</span>
+			{/if}
 		</div>
 	</div>
 </svelte:element>
@@ -99,7 +117,7 @@
 		}
 	}
 
-	.group:hover .suffix-tail {
+	.group-interactive:hover .suffix-tail {
 		max-width: 60ch;
 	}
 
@@ -110,7 +128,7 @@
 		transition-delay: 0ms;
 	}
 
-	.group:hover .suffix-word {
+	.group-interactive:hover .suffix-word {
 		opacity: 1;
 		transition-delay: calc(var(--i) * 25ms);
 	}
@@ -129,36 +147,30 @@
 	}
 
 	.cta-swap .swap-layer--cta {
+		position: absolute;
+		inset-block: 0;
+		right: 0;
+		display: inline-flex;
+		align-items: center;
+		width: max-content;
+		white-space: nowrap;
 		opacity: 0;
 		transform: translateY(0.75rem);
 		filter: blur(2px);
 		pointer-events: none;
 	}
 
-	.group:hover .cta-swap .swap-layer--date {
-		opacity: 0;
-		transform: translateY(-0.75rem);
-		filter: blur(2px);
-	}
-
-	.group:hover .cta-swap .swap-layer--cta {
-		opacity: 1;
-		transform: translateY(0);
-		filter: blur(0);
-		pointer-events: auto;
-	}
-
-	.new-chip {
-		transition:
-			opacity 200ms var(--ease-out-cubic),
-			transform 200ms var(--ease-out-cubic),
-			filter 200ms var(--ease-out-cubic);
-	}
-
-	.group:hover .new-chip {
+	.group-interactive:hover .cta-swap .swap-layer--date {
 		opacity: 0;
 		transform: translateY(-0.75rem);
 		filter: blur(2px);
 		pointer-events: none;
+	}
+
+	.group-interactive:hover .cta-swap .swap-layer--cta {
+		opacity: 1;
+		transform: translateY(0);
+		filter: blur(0);
+		pointer-events: auto;
 	}
 </style>

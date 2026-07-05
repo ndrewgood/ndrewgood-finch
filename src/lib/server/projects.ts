@@ -76,24 +76,9 @@ function getIconSvg(slug: string): string {
 	return key ? normalizeProjectIconSvg(projectIconFiles[key]) : '';
 }
 
-const SHORT_MONTHS = [
-	'Jan',
-	'Feb',
-	'Mar',
-	'Apr',
-	'May',
-	'Jun',
-	'Jul',
-	'Aug',
-	'Sept',
-	'Oct',
-	'Nov',
-	'Dec'
-] as const;
-
 function formatEndDate(iso: string): string {
 	const date = new Date(`${iso}T00:00:00`);
-	return `${SHORT_MONTHS[date.getMonth()]} ${date.getFullYear()}`;
+	return String(date.getFullYear());
 }
 
 function toAllProjectListItem(slug: string, project: ProjectYaml): AllProjectListItem | null {
@@ -110,6 +95,7 @@ function toAllProjectListItem(slug: string, project: ProjectYaml): AllProjectLis
 		iconSvg: getIconSvg(slug),
 		endDateLabel: formatEndDate(endDate),
 		tags: project.tags ?? [],
+		featuredTags: project.featuredTags ?? [],
 		...(project.videoId ? { videoId: project.videoId } : {}),
 		cta: project.cta ?? '',
 		ctaText: project.ctaText ?? 'Visit site'

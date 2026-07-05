@@ -13,8 +13,15 @@
 	import InfoContent from './InfoContent.svelte';
 	import SpacesContent from './SpacesContent.svelte';
 
-	let { experience = [], pastSites = [] }: { experience?: ExperienceEntry[]; pastSites?: PastSiteEntry[] } =
-		$props();
+	let {
+		experience = [],
+		pastSites = [],
+		colophonHtml = null
+	}: {
+		experience?: ExperienceEntry[];
+		pastSites?: PastSiteEntry[];
+		colophonHtml?: string | null;
+	} = $props();
 
 	type NavPosition = 'first' | 'middle' | 'last';
 
@@ -384,7 +391,7 @@
                             style:width="{contentWidth}px"
                         >
                             {#if renderedPanel === 'Info'}
-                                <InfoContent {experience} />
+                                <InfoContent {experience} {colophonHtml} />
                             {:else if renderedPanel === 'Spaces'}
                                 <SpacesContent {pastSites} />
                             {:else if renderedPanel === 'Contact'}

@@ -22,6 +22,7 @@ export type AllProjectListItem = {
 	iconSvg: string;
 	endDateLabel: string;
 	tags: ProjectListTag[];
+	featuredTags: string[];
 	videoId?: string;
 	cta: string;
 	ctaText: string;
