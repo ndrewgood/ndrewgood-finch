@@ -10,7 +10,7 @@
 	let { pastSites = [] }: { pastSites?: PastSiteEntry[] } = $props();
 </script>
 
-<div class="flex flex-col gap-4 p-8">
+<div class="flex flex-col gap-4 p-6">
 	<a
 		class="group flex h-fit min-h-[102px] w-full cursor-pointer flex-row items-center gap-4 rounded-xl border border-stone-200 px-6 text-left text-stone-900 no-underline transition-colors duration-[120ms] ease-out-cubic hover:bg-stone-100 hover:text-stone-900 active:text-stone-900"
 		href="https://google.com"
@@ -24,7 +24,7 @@
 			</div>
 		</div>
 		<div class="flex min-w-0 flex-1 flex-row items-center gap-4">
-			<div class="flex flex-col justify-center gap-1 py-3">
+			<div class="flex flex-col justify-center gap-1 py-5">
 				<h4 class="text-xl leading-5">Records</h4>
 				<p class="text-sm leading-4 text-stone-400">An archive of all of the vinyl records I own, with some additional personal notes</p>
 			</div>
@@ -49,7 +49,7 @@
 				class="size-38 -translate-x-1 translate-y-1 object-cover transition-transform duration-[120ms] ease-out-cubic group-hover:-translate-y-2"
 			/>
 		</div>
-		<div class="flex min-w-0 flex-1 flex-row items-center gap-4 py-3">
+		<div class="flex min-w-0 flex-1 flex-row items-center gap-4 py-5">
 			<div class="flex flex-col justify-center gap-1">
 				<h4 class="text-xl leading-5">Andrew Mail</h4>
 				<p class="text-sm leading-4 text-stone-400">My quarterly newsletter for friends and family where I document whats going on in my life</p>
@@ -69,7 +69,7 @@
 	<div class="h-line-light w-[250px]"></div>
 </div>
 
-<div class="flex flex-col gap-2 p-8">
+<div class="flex flex-col gap-2 px-4 py-6 min-[700px]:p-8">
 	{#each pastSites as site (site.dateRange)}
 		<a
 			class="group flex w-full scale-[98%] cursor-pointer flex-row items-center gap-4 rounded-xl px-6 py-5 text-left text-stone-900 no-underline transition-all duration-[300ms] ease-out-cubic hover:scale-100 hover:bg-stone-100 hover:text-stone-900 active:scale-100 active:text-stone-900"

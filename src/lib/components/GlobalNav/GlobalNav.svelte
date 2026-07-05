@@ -56,7 +56,7 @@
 		{ id: 'Contact', width: 520, height: 370 }
 	];
 
-	const maxNavWidthRatio = 0.9;
+	const navEdgeInset = 16;
 
 	let viewportWidth = $state(0);
 
@@ -108,7 +108,7 @@
 
 	function getMaxNavWidth() {
 		if (!viewportWidth) return Infinity;
-		return viewportWidth * maxNavWidthRatio;
+		return Math.max(0, viewportWidth - navEdgeInset * 2);
 	}
 
 	function clampNavWidth(width: number) {
@@ -312,7 +312,7 @@
 
 <div
 	bind:this={navContainer}
-	class='fixed top-4 left-1/2 z-10 flex max-w-[90vw] -translate-x-1/2 flex-col rounded-xl'
+	class='fixed top-4 left-1/2 z-10 flex max-w-[calc(100vw-32px)] -translate-x-1/2 flex-col rounded-xl'
 >
     <div
         class={[

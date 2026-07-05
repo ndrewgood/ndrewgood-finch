@@ -37,7 +37,7 @@
 	<div class="h-line-light w-[250px]"></div>
 </div>
 
-<div class="flex flex-col gap-3 p-6 min-[700px]:p-8">
+<div class="flex flex-col gap-3 px-4 py-6 min-[700px]:p-8">
 	{#each experience as entry (entry.label)}
 		<ExperienceRow
 			{entry}

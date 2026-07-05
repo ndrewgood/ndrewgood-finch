@@ -85,7 +85,7 @@
 			<div class={layerRowClass}>
 				<div class="flex min-w-0 flex-1 flex-col justify-center gap-1">
 					<h4 class="text-xl leading-5">Asking for microphone permission</h4>
-					<p class="text-sm leading-4 text-stone-400">Look for a pop-up in your browser...</p>
+					<p class="text-sm leading-4 text-stone-400 min-[700px]:block hidden">Look for a pop-up in your browser...</p>
 				</div>
 				<span class={[iconWrapperClass, 'opacity-80']} aria-hidden="true">
 					<Icon name="mic_pending" class="size-6" />

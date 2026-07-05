@@ -5,12 +5,19 @@
 	import AllWorkRow from '$lib/components/AllWorkRow.svelte';
 	import FeaturedProject from '$lib/components/FeaturedProject.svelte';
 	import Footer, { FOOTER_HEIGHT } from '$lib/components/Footer.svelte';
+	import HeroRichText from '$lib/components/HeroRichText.svelte';
 	import LayoutViewControl, { type LayoutView } from '$lib/components/LayoutViewControl.svelte';
+	import { HERO_BUTTON_DELAY_MS, HERO_WORD_OPACITY_MS, HERO_WORD_SLIDE_MS } from '$lib/hero-text';
 	import { openNavPanel } from '$lib/nav.svelte';
 
 	let allWorkSection: HTMLElement | undefined = $state();
 	let layoutView = $state<LayoutView>('list');
 	let viewGeneration = $state(0);
+	let heroWordsReady = $state(false);
+
+	function handleHeroReady() {
+		heroWordsReady = true;
+	}
 
 	function handleLayoutViewChange() {
 		viewGeneration += 1;
@@ -18,15 +25,21 @@
 </script>
 
 <div class="relative z-[1] bg-stone-100" style:margin-bottom="{FOOTER_HEIGHT}px">
-	<section class="mx-auto flex h-[700px] max-w-lg flex-col items-center justify-center gap-6 py-20">
+	<section
+		class="mx-auto flex h-[700px] max-w-lg flex-col items-center justify-center gap-6 py-20"
+		style="--hero-word-opacity-duration: {HERO_WORD_OPACITY_MS}ms; --hero-word-slide-duration: {HERO_WORD_SLIDE_MS}ms; --hero-button-delay: {HERO_BUTTON_DELAY_MS}ms;"
+	>
 		{#if data.heroTextHtml}
-			<div class="display text-center" data-hero-rich-text>
-				{@html data.heroTextHtml}
-			</div>
+			<HeroRichText html={data.heroTextHtml} onReady={handleHeroReady} />
+			<Button
+				class={heroWordsReady ? 'hero-button-in' : 'invisible'}
+				onclick={() => openNavPanel('Info')}
+			>
+				More about me
+			</Button>
 		{/if}
-		<Button onclick={() => openNavPanel('Info')}>More about me</Button>
 	</section>
-	<section class="mx-auto flex flex-col items-center gap-18 pb-24">
+	<section class="page-load-fade-in mx-auto flex flex-col items-center gap-18 pb-24">
 		<div class="flex flex-col gap-3">
 			<h3 class="text-center">Featured work</h3>
 			<div class="h-line w-[250px]"></div>
@@ -40,7 +53,7 @@
 	<section
 		bind:this={allWorkSection}
 		class={[
-			'mx-auto flex flex-col items-center gap-6 pt-12 pb-52 w-full px-6',
+			'page-load-fade-in mx-auto flex flex-col items-center gap-6 pt-12 pb-52 w-full min-[500px]:px-6 px-4',
 			layoutView === 'grid' ? 'max-w-[1100px]' : 'max-w-3xl'
 		]}
 	>

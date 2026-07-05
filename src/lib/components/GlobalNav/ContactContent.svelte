@@ -15,16 +15,16 @@
 		'group flex w-full cursor-pointer bg-stone-100 flex-row justify-center items-center gap-4 rounded-xl py-2 text-left text-stone-900 no-underline transition-colors duration-[120ms] ease-out-cubic hover:bg-stone-200 hover:text-stone-900 active:text-stone-900';
 </script>
 
-<div class="flex flex-col gap-4 px-8 pt-6 pb-4">
+<div class="flex flex-col gap-4 min-[700px]:px-8 px-4 pt-6 pb-4">
 	<CopyEmailButton />
 	<RecordVoiceMemoButton />
 </div>
 
-<div class="flex flex-col gap-2 px-8">
+<div class="flex flex-col gap-2 min-[700px]:px-8 px-4">
 	<div class="h-line-light w-full"></div>
 </div>
 
-<div class="flex flex-row gap-4 px-8 pb-8 pt-4">
+<div class="flex flex-row min-[700px]:gap-4 gap-2 min-[700px]:px-8 px-4 pb-8 pt-4">
 	{#each socialLinks as link (link.icon)}
 		<a
 			href={link.href}
