@@ -56,7 +56,7 @@
 			{/if}
 		</div>
 		<div class="flex min-w-0 flex-col gap-0">
-			<h3 class="leading-5">{title}</h3>
+			<h3 class="leading-5 min-[500px]:text-xl text-lg">{title}</h3>
 			<p>
 				{shortDescription}{#if suffixWords.length}
 					<span class="suffix-tail">
