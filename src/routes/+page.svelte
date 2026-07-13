@@ -32,7 +32,8 @@
 		{#if data.heroTextHtml}
 			<HeroRichText html={data.heroTextHtml} onReady={handleHeroReady} />
 			<Button
-				class={heroWordsReady ? 'hero-button-in' : 'invisible'}
+				class="{heroWordsReady ? 'hero-button-in' : 'hero-button-pending'} !transition-none"
+				style={heroWordsReady ? undefined : 'opacity:0;visibility:hidden'}
 				onclick={() => openNavPanel('Info')}
 			>
 				More about me

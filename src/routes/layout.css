@@ -226,8 +226,16 @@
 				forwards;
 	}
 
+	.hero-button-pending {
+		opacity: 0;
+		visibility: hidden;
+		transition: none;
+	}
+
 	.hero-button-in {
 		opacity: 0;
+		visibility: visible;
+		transition: none;
 		animation:
 			hero-word-opacity var(--hero-word-opacity-duration) var(--ease-out-cubic)
 				var(--hero-button-delay, 1.7s) forwards,

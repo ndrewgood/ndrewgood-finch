@@ -1,9 +1,12 @@
 title: 258 Zine
 shortDescription: Website
 description: Website for a student zine showcases 6 unique artists
+hide: false
 icon: /content/all-projects/icons/258-zine/icon.svg
+tags: []
 featuredTags:
   - Development
+videoId: xTUqA2Fw3c4JWEtIqy02XUHN9rEm700rnbgQeRagpeT01g
 cta: https://258zine.vercel.app/
 ctaText: Visit site
 startDate: 2020-11-01

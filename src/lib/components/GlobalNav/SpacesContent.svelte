@@ -65,7 +65,7 @@
 </div>
 
 <div class="mt-8 flex flex-col gap-2">
-	<h3 class="text-center">Past sites</h3>
+	<h3 class="text-center">Past personal sites</h3>
 	<div class="h-line-light w-[250px]"></div>
 </div>
 
