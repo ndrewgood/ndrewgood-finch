@@ -161,6 +161,13 @@ export default config({
 					description:
 						'Mux playback ID for this project. Find it in your Mux assets: https://dashboard.mux.com/organizations/a2qbf5/environments/get0st/video/assets'
 				}),
+				heroImage: fields.image({
+					label: 'Hero image',
+					description:
+						'Static thumbnail for the all-projects grid. Fades out on hover to reveal the video.',
+					directory: 'static/content/all-projects/hero-images',
+					publicPath: '/content/all-projects/hero-images/'
+				}),
 				highlightColor: fields.text({
 					label: 'Highlight color',
 					description: 'Hex color used for the video hover glow (e.g. #1A2B4A).'

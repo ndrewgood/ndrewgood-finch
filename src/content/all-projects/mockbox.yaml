@@ -1,11 +1,14 @@
 title: Mockbox
 shortDescription: Web tool
 description: Web tool for mocking up box-shaped objects
+hide: false
 icon: /content/all-projects/icons/mockbox/icon.svg
+tags: []
 featuredTags:
   - Design
   - Development
 videoId: VeNj3pxJzhnG7S17002rpDUSnfHyZm4cR2lLpMDot1nU
+heroImage: /content/all-projects/hero-images/mockbox/heroImage.png
 highlightColor: '#1A2B4A'
 cta: https://mockbox.app
 ctaText: Visit site

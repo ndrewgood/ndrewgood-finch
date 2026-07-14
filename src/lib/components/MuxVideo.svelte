@@ -10,6 +10,10 @@
 		inView?: boolean;
 		/** When false, hides playback controls so the parent can handle clicks. */
 		interactive?: boolean;
+		/** Seek to the start when leaving view / pausing from external control. */
+		resetOnExit?: boolean;
+		/** When false, disables the paused-state scale transform (parent can own scale). */
+		scaleOnPause?: boolean;
 		/** Called with a toggle function so parents can control playback. */
 		onRegisterToggle?: (toggle: () => void) => void;
 	};
@@ -20,6 +24,8 @@
 		isPaused = $bindable(true),
 		inView,
 		interactive = true,
+		resetOnExit = false,
+		scaleOnPause = true,
 		onRegisterToggle
 	}: Props = $props();
 
@@ -51,6 +57,11 @@
 			void player.play();
 		} else if (!shouldPlay && !player.paused) {
 			player.pause();
+		}
+
+		if (resetOnExit && !effectiveInView) {
+			player.currentTime = 0;
+			currentTime = 0;
 		}
 	});
 
@@ -159,8 +170,9 @@
 <div class="relative" bind:this={container}>
 	<div
 		class={[
-			'video-shell group relative aspect-[4/3] w-full origin-center overflow-hidden rounded-2xl bg-stone-150 transition-transform duration-300 ease-out-cubic',
-			isPaused && 'scale-[0.98]',
+			'video-shell group relative aspect-[4/3] w-full origin-center overflow-hidden rounded-2xl bg-stone-150',
+			scaleOnPause && 'transition-transform duration-300 ease-out-cubic',
+			scaleOnPause && isPaused && 'scale-[0.98]',
 			!interactive && 'pointer-events-none'
 		]}
 	>

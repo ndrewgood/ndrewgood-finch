@@ -24,6 +24,7 @@ export type AllProjectListItem = {
 	tags: ProjectListTag[];
 	featuredTags: string[];
 	videoId?: string;
+	heroImageUrl?: string;
 	cta: string;
 	ctaText: string;
 };

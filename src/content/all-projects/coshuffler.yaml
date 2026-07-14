@@ -1,11 +1,14 @@
 title: CoShuffler
 shortDescription: Figma plugin
 description: Figma plugin for randomizing colors from a palette
+hide: false
 icon: /content/all-projects/icons/coshuffler/icon.svg
+tags: []
 featuredTags:
   - Design
   - Development
 videoId: GmbcJjynrVVOxEq4BZblmT8AR1qjNsRRRnJk7BonOWY
+heroImage: /content/all-projects/hero-images/coshuffler/heroImage.png
 highlightColor: '#7C5CFC'
 cta: https://www.figma.com/community/plugin/974496433337884240/coshuffler
 ctaText: Go to Figma

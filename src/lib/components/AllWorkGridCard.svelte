@@ -14,6 +14,7 @@
 		tags,
 		featuredTags,
 		videoId,
+		heroImageUrl,
 		cta,
 		ctaText
 	}: AllProjectListItem = $props();
@@ -28,6 +29,8 @@
 	const isInteractive = $derived(Boolean(cta));
 	const isVideoInteractive = $derived(Boolean(videoId) && !cta);
 	const showPointer = $derived(isInteractive || isVideoInteractive);
+	const hasHeroImage = $derived(Boolean(heroImageUrl));
+	const showHeroOverlay = $derived(hasHeroImage && !isHovered);
 
 	function handleCardClick() {
 		if (isVideoInteractive) toggleVideoPlayback?.();
@@ -106,16 +109,40 @@
 	</div>
 
 	{#if videoId}
-		<MuxVideo
-			playbackId={videoId}
-			{title}
-			inView={isHovered}
-			interactive={false}
-			onRegisterToggle={(toggle) => {
-				toggleVideoPlayback = toggle;
-			}}
-			bind:isPaused
-		/>
+		<div
+			class={[
+				'relative origin-center transition-transform duration-300 ease-out-cubic',
+				isHovered ? 'scale-100' : 'scale-[0.98]'
+			]}
+		>
+			<MuxVideo
+				playbackId={videoId}
+				{title}
+				inView={isHovered}
+				interactive={false}
+				resetOnExit
+				scaleOnPause={false}
+				onRegisterToggle={(toggle) => {
+					toggleVideoPlayback = toggle;
+				}}
+				bind:isPaused
+			/>
+			{#if heroImageUrl}
+				<div
+					class={[
+						'pointer-events-none absolute inset-0 z-1 overflow-hidden rounded-2xl transition-opacity duration-300 ease-out-cubic',
+						showHeroOverlay ? 'opacity-100' : 'opacity-0'
+					]}
+					aria-hidden="true"
+				>
+					<img src={heroImageUrl} alt="" class="size-full object-cover" />
+				</div>
+			{/if}
+		</div>
+	{:else if heroImageUrl}
+		<div class="aspect-[4/3] w-full overflow-hidden rounded-2xl bg-stone-200">
+			<img src={heroImageUrl} alt="" class="size-full object-cover" />
+		</div>
 	{:else}
 		<div class="aspect-[4/3] w-full rounded-2xl bg-stone-200"></div>
 	{/if}

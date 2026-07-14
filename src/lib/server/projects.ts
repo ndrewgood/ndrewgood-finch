@@ -22,6 +22,7 @@ type ProjectYaml = {
 	tags?: ProjectListTag[];
 	featuredTags?: string[];
 	videoId?: string;
+	heroImage?: string;
 	highlightColor?: string;
 	cta?: string;
 	ctaText?: string;
@@ -97,6 +98,7 @@ function toAllProjectListItem(slug: string, project: ProjectYaml): AllProjectLis
 		tags: project.tags ?? [],
 		featuredTags: project.featuredTags ?? [],
 		...(project.videoId ? { videoId: project.videoId } : {}),
+		...(project.heroImage ? { heroImageUrl: project.heroImage } : {}),
 		cta: project.cta ?? '',
 		ctaText: project.ctaText ?? 'Visit site'
 	};

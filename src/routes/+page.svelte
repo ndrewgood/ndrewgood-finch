@@ -24,6 +24,10 @@
 	}
 </script>
 
+<svelte:head>
+	<title>Andrew Goodridge - @ndrewgood</title>
+</svelte:head>
+
 <div class="relative z-[1] bg-stone-100" style:margin-bottom="{FOOTER_HEIGHT}px">
 	<section
 		class="mx-auto flex min-[700px]:h-[700px] h-[650px] max-w-lg flex-col items-center justify-center gap-6 py-20"
