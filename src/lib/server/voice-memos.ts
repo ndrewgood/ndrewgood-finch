@@ -3,6 +3,7 @@ import { randomUUID } from 'node:crypto';
 import { FieldValue } from 'firebase-admin/firestore';
 
 import { getAdminFirestore, getAdminStorage } from '$lib/server/firebase-admin';
+import { notifyVoiceMemoReceived } from '$lib/server/voice-memo-notify';
 import { VOICE_MEMO_CONFIG } from '$lib/voice-memo.config';
 
 const COLLECTION = 'voiceMemos';
@@ -104,6 +105,11 @@ export async function saveVoiceMemo(input: {
 			sizeBytes: input.audio.length,
 			createdAt: FieldValue.serverTimestamp()
 		});
+
+	const message = input.message.trim();
+	void notifyVoiceMemoReceived(message).catch((notifyError) => {
+		console.error('Voice memo SMS notification failed:', notifyError);
+	});
 
 	return { id };
 }

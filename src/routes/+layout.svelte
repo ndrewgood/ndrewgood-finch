@@ -4,14 +4,21 @@
 
 	import GlobalNav from '$lib/components/GlobalNav';
 	import { faviconActive, initDynamicFavicon } from '$lib/favicon';
+	import { navPreloadImageUrls, preloadNavImages } from '$lib/preload-nav-images';
 
 	let { data, children } = $props();
 
-	onMount(() => initDynamicFavicon());
+	onMount(() => {
+		initDynamicFavicon();
+		preloadNavImages();
+	});
 </script>
 
 <svelte:head>
 	<link rel="icon" href={faviconActive} data-dynamic-favicon />
+	{#each navPreloadImageUrls as href (href)}
+		<link rel="preload" as="image" {href} />
+	{/each}
 	<meta property="og:image" content={data.ogImageUrl} />
 	<meta property="og:image:width" content="1200" />
 	<meta property="og:image:height" content="630" />

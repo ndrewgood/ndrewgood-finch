@@ -116,15 +116,21 @@
 	onMount(async () => {
 		canHover = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
 
-		await Promise.all(
-			infoPhotoUrls.map((url) => {
-				const image = new Image();
-				image.src = url;
-				return image.decode?.() ?? Promise.resolve();
-			})
-		);
+		const [firstUrl, ...restUrls] = infoPhotoUrls;
+		if (firstUrl) {
+			const first = new Image();
+			first.src = firstUrl;
+			await first.decode?.().catch(() => undefined);
+		}
+
 		isReady = true;
 		startAutoRotation();
+
+		for (const url of restUrls) {
+			const image = new Image();
+			image.src = url;
+			void image.decode?.().catch(() => undefined);
+		}
 	});
 
 	onDestroy(() => {

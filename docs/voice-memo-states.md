@@ -98,7 +98,7 @@ Recorder toolbar inside a nested `bg-stone-150` container.
 - Waveform samples: configurable bar count + sample interval (see config)
 - **Backend:** `POST /api/voice-memos` uploads audio + message to Firebase Storage/Firestore via Admin SDK
 - **Admin:** `/answering-machine` (password in `ANSWERING_MACHINE_PASSWORD`) lists memos with signed audio URLs
-- **Env:** see [`.env.example`](../../.env.example) for required Firebase + auth variables
+- **Env:** see [`.env.example`](../.env.example) for required Firebase, auth, and Twilio SMS notify variables
 
 ## Future work
 

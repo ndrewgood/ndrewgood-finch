@@ -13,7 +13,7 @@
 <div class="flex flex-col gap-4 p-6">
 	<a
 		class="group flex h-fit min-h-[102px] w-full cursor-pointer flex-row items-center gap-4 rounded-xl border border-stone-200 px-6 text-left text-stone-900 no-underline transition-colors duration-[120ms] ease-out-cubic hover:bg-stone-100 hover:text-stone-900 active:text-stone-900"
-		href="https://google.com"
+		href="https://records.ndrewgood.com"
 		target="_blank"
 		rel="noopener noreferrer"
 	>
