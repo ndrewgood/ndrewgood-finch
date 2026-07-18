@@ -22,7 +22,7 @@
 	}
 </script>
 
-<div class="mt-2 flex flex-col items-center gap-5 p-8 min-[700px]:flex-row min-[700px]:items-start">
+<div class="mt-2 flex flex-col items-center gap-5 min-[500px]:p-8 p-6 min-[700px]:flex-row min-[700px]:items-start">
 	<InfoPhotoCarousel />
 	{#if infoBioHtml}
 		<div class="info-bio">

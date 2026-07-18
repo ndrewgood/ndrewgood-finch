@@ -9,7 +9,7 @@ The contact panel voice memo button (`RecordVoiceMemoButton.svelte`) moves throu
 Default view.
 
 - Title: **Send voice memo**
-- Subtitle: Goes directly to Andrew’s phone
+- Subtitle: Goes directly to Andrew’s inbox
 - Icon: `mic_outline`
 - Interaction: clicking anywhere requests microphone access and moves to **Awaiting permission**
 
@@ -98,7 +98,7 @@ Recorder toolbar inside a nested `bg-stone-150` container.
 - Waveform samples: configurable bar count + sample interval (see config)
 - **Backend:** `POST /api/voice-memos` uploads audio + message to Firebase Storage/Firestore via Admin SDK
 - **Admin:** `/answering-machine` (password in `ANSWERING_MACHINE_PASSWORD`) lists memos with signed audio URLs
-- **Env:** see [`.env.example`](../.env.example) for required Firebase, auth, and Twilio SMS notify variables
+- **Env:** see [`.env.example`](../.env.example) for required Firebase, auth, and Resend email notify variables
 
 ## Future work
 

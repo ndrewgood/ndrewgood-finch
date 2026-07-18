@@ -1,42 +1,66 @@
-# sv
+# ndrewgood.com
 
-Everything you need to build a Svelte project, powered by [`sv`](https://github.com/sveltejs/cli).
+Andrew Goodridge's personal portfolio, built with SvelteKit and deployed on Vercel.
 
-## Creating a project
+## Tech stack
 
-If you're seeing this, you've probably already done this step. Congrats!
+### Application
+
+- **Svelte 5** with runes for components and reactive state
+- **SvelteKit 2** for routing, server rendering, API routes, and server actions
+- **TypeScript** throughout the application
+- **Vite** for local development and production builds
+- **Tailwind CSS 4** for utility-first styling
+- **Motion** for interface animation
+
+### Content and media
+
+- **Keystatic** provides a local, Git-backed CMS for projects, experience, bio, and colophon content
+- **Marked** renders Markdown content on the server
+- **Mux Player** delivers project videos
+- Project metadata is stored as YAML, JSON, MDX, and Markdoc files under `src/content`
+
+### Voice memos
+
+- The browser's MediaRecorder and Web Audio APIs record audio and convert it to WAV
+- **Firebase Storage** stores recordings
+- **Cloud Firestore** stores memo metadata
+- **Resend** emails new-memo notifications with the WAV attached
+- A password-protected SvelteKit route provides the answering-machine inbox
+
+### Infrastructure and tooling
+
+- **Vercel** hosts the SvelteKit application through `@sveltejs/adapter-vercel`
+- **Firebase Admin SDK** handles server-side Firebase access
+- **ESLint**, **Prettier**, and **svelte-check** provide linting, formatting, and type checking
+- **npm** manages dependencies and scripts
+
+## Local development
+
+Install dependencies and start the development server:
 
 ```sh
-# create a new project
-npx sv create my-app
-```
-
-To recreate this project with the same configuration:
-
-```sh
-# recreate this project
-npx sv@0.15.3 create --template minimal --types ts --add prettier eslint tailwindcss="plugins:none" mcp="ide:cursor+setup:local" --install npm ndrewgood-finch
-```
-
-## Developing
-
-Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
-
-```sh
+npm install
 npm run dev
-
-# or start the server and open the app in a new browser tab
-npm run dev -- --open
 ```
 
-## Building
+The site is available at `http://localhost:5173`.
 
-To create a production version of your app:
+Create a local `.env` from `.env.example` and add the credentials needed for
+Firebase, the answering-machine admin page, and Resend.
+
+## Scripts
 
 ```sh
-npm run build
+npm run dev       # Start the development server
+npm run build     # Create a production build
+npm run preview   # Preview the production build
+npm run check     # Run Svelte and TypeScript checks
+npm run lint      # Check formatting and lint rules
+npm run format    # Format the repository
 ```
 
-You can preview the production build with `npm run preview`.
+## Deployment
 
-> To deploy your app, you may need to install an [adapter](https://svelte.dev/docs/kit/adapters) for your target environment.
+The project uses the Vercel adapter. Configure the variables listed in
+`.env.example` in the Vercel project before deploying.

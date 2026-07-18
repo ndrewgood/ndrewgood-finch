@@ -1,6 +1,7 @@
 import { browser } from '$app/environment';
 import { onDestroy } from 'svelte';
 
+import { convertToWav } from '$lib/audio-wav';
 import { createStateSwap } from '$lib/state-swap.svelte';
 import { VOICE_MEMO_CONFIG } from '$lib/voice-memo.config';
 
@@ -468,13 +469,20 @@ export function createVoiceMemo() {
 
 		await swap.transitionTo('sending');
 
+		// Convert to WAV so the emailed attachment plays inline in Gmail.
+		// Fall back to the raw recording if decoding fails.
+		let uploadBlob = audioBlob;
+		let uploadFilename = recordedMimeType.includes('mp4') ? 'voice-memo.m4a' : 'voice-memo.webm';
+		try {
+			uploadBlob = await convertToWav(audioBlob);
+			uploadFilename = 'voice-memo.wav';
+		} catch (conversionError) {
+			console.warn('WAV conversion failed, uploading original recording:', conversionError);
+		}
+
 		const formData = new FormData();
 		formData.append('message', note.trim());
-		formData.append(
-			'audio',
-			audioBlob,
-			recordedMimeType.includes('mp4') ? 'voice-memo.m4a' : 'voice-memo.webm'
-		);
+		formData.append('audio', uploadBlob, uploadFilename);
 
 		const durationMs = audioElement?.duration ? Math.round(audioElement.duration * 1000) : null;
 		if (durationMs !== null) {

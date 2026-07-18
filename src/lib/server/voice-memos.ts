@@ -15,7 +15,10 @@ const ALLOWED_MIME_TYPES = new Set([
 	'audio/webm',
 	'audio/mp4',
 	'audio/m4a',
-	'audio/x-m4a'
+	'audio/x-m4a',
+	'audio/wav',
+	'audio/x-wav',
+	'audio/wave'
 ]);
 
 function normalizeMimeType(mimeType: string): string {
@@ -43,6 +46,10 @@ export type VoiceMemoRecord = {
 function extensionForMimeType(mimeType: string): string {
 	if (mimeType.includes('mp4') || mimeType.includes('m4a')) {
 		return 'm4a';
+	}
+
+	if (mimeType.includes('wav')) {
+		return 'wav';
 	}
 
 	return 'webm';
@@ -106,9 +113,13 @@ export async function saveVoiceMemo(input: {
 			createdAt: FieldValue.serverTimestamp()
 		});
 
-	const message = input.message.trim();
-	void notifyVoiceMemoReceived(message).catch((notifyError) => {
-		console.error('Voice memo SMS notification failed:', notifyError);
+	void notifyVoiceMemoReceived({
+		message: input.message.trim(),
+		audio: input.audio,
+		mimeType,
+		filename: `voice-memo.${extensionForMimeType(mimeType)}`
+	}).catch((notifyError) => {
+		console.error('Voice memo notification failed:', notifyError);
 	});
 
 	return { id };

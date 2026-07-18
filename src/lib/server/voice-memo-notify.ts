@@ -2,57 +2,77 @@ import { env } from '$env/dynamic/private';
 
 const ANSWERING_MACHINE_URL = 'https://ndrewgood.com/answering-machine';
 
-function buildSmsBody(message: string): string {
-	const prefix = 'New voice memo to ndrewgood.com: ';
-	const suffix = ` ${ANSWERING_MACHINE_URL}`;
-	const maxBodyLength = 320;
-	const available = Math.max(24, maxBodyLength - prefix.length - suffix.length);
-	const trimmed = message.trim();
-	const clipped =
-		trimmed.length > available ? `${trimmed.slice(0, Math.max(0, available - 1)).trimEnd()}…` : trimmed;
+// Works without domain verification, but can only deliver to the Resend
+// account owner's email. Set RESEND_FROM_EMAIL once ndrewgood.com is verified.
+const DEFAULT_FROM_EMAIL = 'onboarding@resend.dev';
 
-	return `${prefix}${clipped}${suffix}`;
+// Gmail shows roughly 50-70 subject characters on desktop; the prefix uses ~30.
+const SUBJECT_PREVIEW_MAX_LENGTH = 40;
+
+function subjectPreview(message: string): string {
+	if (message.length <= SUBJECT_PREVIEW_MAX_LENGTH) {
+		return message;
+	}
+
+	return `${message.slice(0, SUBJECT_PREVIEW_MAX_LENGTH).trimEnd()}…`;
+}
+
+function escapeHtml(text: string): string {
+	return text
+		.replaceAll('&', '&amp;')
+		.replaceAll('<', '&lt;')
+		.replaceAll('>', '&gt;')
+		.replaceAll('"', '&quot;');
 }
 
 /**
- * Sends an SMS via Twilio. Firebase has no outbound SMS API for arbitrary text;
- * Firestore remains the source of truth, and Twilio delivers the notification.
- * Failures are logged and never block the voice-memo upload.
+ * Sends an email via Resend when a new voice memo arrives, with the audio file
+ * attached (memos are capped at 10MB, well under Resend's 40MB email limit).
+ * Firestore remains the source of truth; the email is just a notification with
+ * a link to the answering machine. Failures are logged and never block the
+ * memo upload.
  */
-export async function notifyVoiceMemoReceived(message: string): Promise<void> {
-	const accountSid = env.TWILIO_ACCOUNT_SID;
-	const authToken = env.TWILIO_AUTH_TOKEN;
-	const fromNumber = env.TWILIO_FROM_NUMBER;
-	const toNumber = env.VOICE_MEMO_NOTIFY_PHONE;
+export async function notifyVoiceMemoReceived(input: {
+	message: string;
+	audio: Buffer;
+	mimeType: string;
+	filename: string;
+}): Promise<void> {
+	const apiKey = env.RESEND_API_KEY;
+	const toEmail = env.VOICE_MEMO_NOTIFY_EMAIL;
+	const fromEmail = env.RESEND_FROM_EMAIL || DEFAULT_FROM_EMAIL;
 
-	if (!accountSid || !authToken || !fromNumber || !toNumber) {
-		console.warn(
-			'Voice memo SMS skipped: set TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_FROM_NUMBER, and VOICE_MEMO_NOTIFY_PHONE'
-		);
+	if (!apiKey || !toEmail) {
+		console.warn('Voice memo email skipped: set RESEND_API_KEY and VOICE_MEMO_NOTIFY_EMAIL');
 		return;
 	}
 
-	const body = buildSmsBody(message);
-	const credentials = Buffer.from(`${accountSid}:${authToken}`).toString('base64');
+	const trimmed = input.message.trim();
 
-	const response = await fetch(
-		`https://api.twilio.com/2010-04-01/Accounts/${accountSid}/Messages.json`,
-		{
-			method: 'POST',
-			headers: {
-				Authorization: `Basic ${credentials}`,
-				'Content-Type': 'application/x-www-form-urlencoded'
-			},
-			body: new URLSearchParams({
-				To: toNumber,
-				From: fromNumber,
-				Body: body
-			})
-		}
-	);
+	const response = await fetch('https://api.resend.com/emails', {
+		method: 'POST',
+		headers: {
+			Authorization: `Bearer ${apiKey}`,
+			'Content-Type': 'application/json'
+		},
+		body: JSON.stringify({
+			from: `ndrewgood.com <${fromEmail}>`,
+			to: [toEmail],
+			subject: `☎️ Ring ring! New voice memo: "${subjectPreview(trimmed)}"`,
+			text: `"${trimmed}"\n\nListen: ${ANSWERING_MACHINE_URL}`,
+			html: `<p>&ldquo;${escapeHtml(trimmed)}&rdquo;</p><p><a href="${ANSWERING_MACHINE_URL}">Listen on the answering machine</a></p>`,
+			attachments: [
+				{
+					filename: input.filename,
+					content: input.audio.toString('base64'),
+					content_type: input.mimeType
+				}
+			]
+		})
+	});
 
 	if (!response.ok) {
 		const detail = await response.text().catch(() => '');
-		throw new Error(`Twilio SMS failed (${response.status}): ${detail}`);
+		throw new Error(`Resend email failed (${response.status}): ${detail}`);
 	}
 }

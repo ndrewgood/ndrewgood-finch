@@ -14,6 +14,8 @@
 	const CLICK_FAN_ANGLE = 8;
 	const TRANSITION_MS = 220;
 	const AUTO_ROTATE_MS = 4000;
+	/** Pixel distance for swipe progress = 1 (full hover fan). */
+	const SWIPE_FULL_PX = 56;
 
 	let currentIndex = $state(0);
 	let isHovered = $state(false);
@@ -25,24 +27,46 @@
 	let animNextRotation = $state<number | null>(null);
 	let animCurrentZ = $state<number | null>(null);
 	let animNextZ = $state<number | null>(null);
+	let swipeProgress = $state(0);
 
 	let autoRotationEnabled = true;
 	let autoRotateInterval: ReturnType<typeof setInterval> | undefined;
 	let canHover = $state(false);
+
+	let swipePointerId: number | null = null;
+	let swipeStartX = 0;
+	/** True once a right-half touch swipe was tracked; suppresses the synthetic click. */
+	let suppressClickFromSwipe = false;
 
 	const isHoverActive = $derived(isHovered && canHover);
 
 	const previewIndex = $derived((currentIndex + 1) % infoPhotoUrls.length);
 
 	const currentRotation = $derived(
-		animCurrentRotation ?? (isHoverActive ? -HOVER_FAN_ANGLE : 0)
+		animCurrentRotation ??
+			(isHoverActive
+				? -HOVER_FAN_ANGLE
+				: swipeProgress > 0
+					? -swipeProgress * HOVER_FAN_ANGLE
+					: 0)
 	);
 	const nextRotation = $derived(
-		animNextRotation ?? (isHoverActive ? HOVER_FAN_ANGLE : IDLE_NEXT_ROTATION)
+		animNextRotation ??
+			(isHoverActive
+				? HOVER_FAN_ANGLE
+				: swipeProgress > 0
+					? swipeProgress * HOVER_FAN_ANGLE
+					: IDLE_NEXT_ROTATION)
 	);
 	const currentZ = $derived(animCurrentZ ?? 2);
 	const nextZ = $derived(animNextZ ?? 1);
-	const nextOpacity = $derived(!isHoverActive && !isAnimating ? 0.4 : 1);
+	const nextOpacity = $derived(
+		swipeProgress > 0
+			? 0.4 + swipeProgress * 0.6
+			: !isHoverActive && !isAnimating
+				? 0.4
+				: 1
+	);
 
 	const photoCardClass = $derived(
 		[
@@ -95,12 +119,20 @@
 		});
 	}
 
-	function stopAutoRotation() {
-		autoRotationEnabled = false;
+	function pauseAutoCycle() {
 		if (autoRotateInterval) {
 			clearInterval(autoRotateInterval);
 			autoRotateInterval = undefined;
 		}
+	}
+
+	function resumeAutoCycle() {
+		if (autoRotationEnabled) startAutoRotation();
+	}
+
+	function stopAutoRotation() {
+		autoRotationEnabled = false;
+		pauseAutoCycle();
 	}
 
 	function startAutoRotation() {
@@ -111,6 +143,49 @@
 				void cyclePhoto();
 			}
 		}, AUTO_ROTATE_MS);
+	}
+
+	function releaseSwipeCapture(target: EventTarget | null, pointerId: number) {
+		if (!(target instanceof HTMLElement)) return;
+		try {
+			if (target.hasPointerCapture(pointerId)) {
+				target.releasePointerCapture(pointerId);
+			}
+		} catch {
+			// ignore — capture may already be released
+		}
+	}
+
+	function resetSwipeVisuals() {
+		swipeProgress = 0;
+		suppressTransitions = false;
+	}
+
+	function cancelSwipe(target: EventTarget | null = null) {
+		const pointerId = swipePointerId;
+		if (pointerId === null) return;
+
+		swipePointerId = null;
+		if (target !== null) releaseSwipeCapture(target, pointerId);
+		resetSwipeVisuals();
+		resumeAutoCycle();
+	}
+
+	function getSwipeBoundsEl(from: EventTarget | null): HTMLElement | null {
+		if (!(from instanceof HTMLElement)) return null;
+		return from.closest('[data-global-nav]');
+	}
+
+	function isPointerInSwipeBounds(event: PointerEvent, from: EventTarget | null) {
+		const boundsEl = getSwipeBoundsEl(from);
+		if (!boundsEl) return false;
+		const rect = boundsEl.getBoundingClientRect();
+		return (
+			event.clientX >= rect.left &&
+			event.clientX <= rect.right &&
+			event.clientY >= rect.top &&
+			event.clientY <= rect.bottom
+		);
 	}
 
 	onMount(async () => {
@@ -137,16 +212,18 @@
 		stopAutoRotation();
 	});
 
-	async function cyclePhoto() {
+	async function cyclePhoto(options?: { fromSwipe?: boolean }) {
 		if (!isReady || isAnimating || infoPhotoUrls.length <= 1) return;
 
 		isAnimating = true;
-		const startingFromHover = isHoverActive;
+		const startingFromHover = isHoverActive || Boolean(options?.fromSwipe);
 
 		animCurrentRotation = startingFromHover ? -HOVER_FAN_ANGLE : 0;
 		animNextRotation = startingFromHover ? HOVER_FAN_ANGLE : IDLE_NEXT_ROTATION;
 		animCurrentZ = 2;
 		animNextZ = 1;
+		swipeProgress = 0;
+		suppressTransitions = false;
 		isHovered = false;
 		await tick();
 		await nextFrame();
@@ -180,6 +257,10 @@
 	}
 
 	async function handleClick() {
+		if (suppressClickFromSwipe) {
+			suppressClickFromSwipe = false;
+			return;
+		}
 		stopAutoRotation();
 		await cyclePhoto();
 	}
@@ -192,10 +273,79 @@
 	function handlePointerLeave() {
 		isPointerInside = false;
 		isHovered = false;
+		// Swipe cancel uses global-nav bounds on pointermove — leaving the
+		// photo alone should not abort the gesture.
+	}
+
+	function handlePointerDown(event: PointerEvent) {
+		if (event.pointerType !== 'touch') return;
+		if (!isReady || isAnimating || infoPhotoUrls.length <= 1) return;
+		if (!(event.currentTarget instanceof HTMLElement)) return;
+
+		// Right half of the full-width carousel strip (includes space beside the photo).
+		const rect = event.currentTarget.getBoundingClientRect();
+		const isRightHalf = event.clientX >= rect.left + rect.width / 2;
+		if (!isRightHalf) return;
+
+		swipePointerId = event.pointerId;
+		swipeStartX = event.clientX;
+		swipeProgress = 0;
+		suppressClickFromSwipe = true;
+		suppressTransitions = true;
+		pauseAutoCycle();
+		event.currentTarget.setPointerCapture(event.pointerId);
+	}
+
+	function handlePointerMove(event: PointerEvent) {
+		if (swipePointerId !== event.pointerId) return;
+
+		if (!isPointerInSwipeBounds(event, event.currentTarget)) {
+			cancelSwipe(event.currentTarget);
+			return;
+		}
+
+		const deltaX = swipeStartX - event.clientX;
+		if (deltaX <= 0) {
+			cancelSwipe(event.currentTarget);
+			return;
+		}
+
+		swipeProgress = Math.min(1, deltaX / SWIPE_FULL_PX);
+	}
+
+	async function handlePointerUp(event: PointerEvent) {
+		if (swipePointerId !== event.pointerId) return;
+
+		const pointerId = swipePointerId;
+		swipePointerId = null;
+		releaseSwipeCapture(event.currentTarget, pointerId);
+
+		const shouldAdvance = swipeProgress >= 1;
+		if (shouldAdvance) {
+			suppressTransitions = false;
+			await cyclePhoto({ fromSwipe: true });
+			resumeAutoCycle();
+		} else {
+			resetSwipeVisuals();
+			resumeAutoCycle();
+		}
+	}
+
+	function handlePointerCancel(event: PointerEvent) {
+		if (swipePointerId !== event.pointerId) return;
+		cancelSwipe(event.currentTarget);
 	}
 </script>
 
-<div class="flex flex-col items-center gap-2">
+<!-- Swipe hit area extends beside the photo; the nested button is the accessible control. -->
+<!-- svelte-ignore a11y_no_static_element_interactions -->
+<div
+	class="flex w-full touch-none flex-col items-center gap-2 self-stretch min-[700px]:w-auto"
+	onpointerdown={handlePointerDown}
+	onpointermove={handlePointerMove}
+	onpointerup={handlePointerUp}
+	onpointercancel={handlePointerCancel}
+>
 	{#if infoPhotoUrls.length > 0}
 		{#if isReady}
 			<button

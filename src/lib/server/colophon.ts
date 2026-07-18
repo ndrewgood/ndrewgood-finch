@@ -9,6 +9,10 @@ const contentFiles = import.meta.glob<string>(
 	}
 );
 
+function withBlankLinkTargets(html: string): string {
+	return html.replaceAll('<a href', '<a target="_blank" rel="noopener noreferrer" href');
+}
+
 export function getColophonHtml(): string | null {
 	const key = Object.keys(contentFiles)[0];
 	if (!key) return null;
@@ -17,5 +21,7 @@ export function getColophonHtml(): string | null {
 	if (!raw) return null;
 
 	const parsed = marked.parse(raw, { async: false });
-	return typeof parsed === 'string' ? parsed : null;
+	if (typeof parsed !== 'string') return null;
+
+	return withBlankLinkTargets(parsed);
 }

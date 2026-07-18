@@ -333,6 +333,7 @@
 
 <div
 	bind:this={navContainer}
+	data-global-nav
 	class='fixed top-4 left-1/2 z-10 flex max-h-[calc(100dvh-32px)] max-w-[calc(100vw-32px)] -translate-x-1/2 flex-col rounded-xl'
 >
     <div

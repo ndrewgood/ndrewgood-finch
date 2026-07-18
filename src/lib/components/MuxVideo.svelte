@@ -172,7 +172,7 @@
 		class={[
 			'video-shell group relative aspect-[4/3] w-full origin-center overflow-hidden rounded-2xl bg-stone-150',
 			scaleOnPause && 'transition-transform duration-300 ease-out-cubic',
-			scaleOnPause && isPaused && 'scale-[0.98]',
+			scaleOnPause && isPaused && 'scale-[0.95]',
 			!interactive && 'pointer-events-none'
 		]}
 	>

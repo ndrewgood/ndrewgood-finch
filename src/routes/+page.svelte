@@ -49,7 +49,7 @@
 			<h3 class="text-center">Featured work</h3>
 			<div class="h-line w-[250px]"></div>
 		</div>
-		<div class="flex flex-col gap-24 w-full px-8 max-w-3xl">
+		<div class="flex flex-col gap-24 w-full px-6 max-w-3xl">
 			{#each data.featuredProjects as project (project.slug)}
 				<FeaturedProject {...project} />
 			{/each}
