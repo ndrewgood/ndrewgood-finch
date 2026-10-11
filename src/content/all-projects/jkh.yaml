@@ -1,12 +1,13 @@
 title: Josh Krauth-Harding
 shortDescription: Portfolio
 description: Portfolio for designer and animator Josh Krauth-Harding
-hide: true
+hide: false
 icon: /content/all-projects/icons/jkh/icon.svg
 tags:
   - New
 featuredTags:
   - Development
+videoId: d3rTfG3iwmrVo2XgA02Z1fSTikeM027hp3IF8PK1D02jog
 cta: https://jkh.work
 ctaText: Visit site
 startDate: 2025-06-01
